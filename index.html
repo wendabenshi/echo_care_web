@@ -9,16 +9,109 @@
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover"
     />
     <meta name="theme-color" content="#18161D" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&display=swap"
-      rel="stylesheet"
-    />
     <title>Echo Care</title>
+    <style>
+      html, body {
+        margin: 0;
+        min-height: 100%;
+        background: #18161D;
+      }
+
+      body {
+        color: #fff;
+        font-family: Georgia, "Times New Roman", serif;
+      }
+
+      #boot-shell {
+        min-height: 100dvh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        background:
+          radial-gradient(circle at 50% 32%, rgba(108, 102, 189, 0.16), transparent 30%),
+          #18161D;
+      }
+
+      .boot-shell__frame {
+        position: relative;
+        width: 100%;
+        height: 100dvh;
+      }
+
+      .boot-shell__glow {
+        position: absolute;
+        left: 50%;
+        top: 33%;
+        width: min(72vw, 320px);
+        aspect-ratio: 1 / 1;
+        transform: translate(-50%, -50%);
+        border-radius: 50%;
+        background:
+          radial-gradient(circle, rgba(124, 116, 231, 0.12) 0%, rgba(124, 116, 231, 0.04) 42%, transparent 74%);
+        filter: blur(8px);
+        animation: bootGlowPulse 3.8s ease-in-out infinite;
+      }
+
+      .boot-shell__particle {
+        position: absolute;
+        width: 3px;
+        height: 3px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.68);
+        box-shadow: 0 0 12px rgba(255, 255, 255, 0.22);
+        animation: bootParticleFloat 4.2s ease-in-out infinite;
+      }
+
+      .boot-shell__particle--1 { left: 26%; top: 25%; animation-delay: 0s; }
+      .boot-shell__particle--2 { left: 67%; top: 20%; animation-delay: 0.6s; }
+      .boot-shell__particle--3 { left: 74%; top: 41%; animation-delay: 1.2s; }
+      .boot-shell__particle--4 { left: 31%; top: 53%; animation-delay: 1.8s; }
+      .boot-shell__particle--5 { left: 58%; top: 61%; animation-delay: 2.4s; }
+      .boot-shell__particle--6 { left: 44%; top: 18%; animation-delay: 3s; }
+
+      .boot-shell__vignette {
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(ellipse 120% 90% at 50% 50%, transparent 42%, rgba(8, 7, 12, 0.55) 100%);
+      }
+
+      .boot-shell__bottom-fade {
+        position: absolute;
+        inset-inline: 0;
+        bottom: 0;
+        height: 128px;
+        background: linear-gradient(to bottom, transparent 0%, #18161D 100%);
+      }
+
+      @keyframes bootGlowPulse {
+        0%, 100% { opacity: 0.78; transform: translate(-50%, -50%) scale(1); }
+        50% { opacity: 1; transform: translate(-50%, -50%) scale(1.04); }
+      }
+
+      @keyframes bootParticleFloat {
+        0%, 100% { transform: translateY(0); opacity: 0.35; }
+        50% { transform: translateY(-6px); opacity: 0.9; }
+      }
+    </style>
   </head>
   <body>
-    <div id="app"></div>
+    <div id="app">
+      <div id="boot-shell" aria-hidden="true">
+        <div class="boot-shell__frame">
+          <div class="boot-shell__glow"></div>
+          <span class="boot-shell__particle boot-shell__particle--1"></span>
+          <span class="boot-shell__particle boot-shell__particle--2"></span>
+          <span class="boot-shell__particle boot-shell__particle--3"></span>
+          <span class="boot-shell__particle boot-shell__particle--4"></span>
+          <span class="boot-shell__particle boot-shell__particle--5"></span>
+          <span class="boot-shell__particle boot-shell__particle--6"></span>
+          <div class="boot-shell__vignette"></div>
+          <div class="boot-shell__bottom-fade"></div>
+        </div>
+      </div>
+    </div>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

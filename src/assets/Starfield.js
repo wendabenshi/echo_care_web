@@ -218,9 +218,14 @@ export default class Starfield {
 		const {
 			star: starColor
 		} = this.colors;
+		const area = this._width * this._height;
+		const adaptiveStarCount =
+			this._width < 480 ? Math.min(starCount, 280) :
+			area < 430000 ? Math.min(starCount, 380) :
+			starCount;
 
 		this._stars = Array.from({
-			length: starCount
+			length: adaptiveStarCount
 		}, () => {
 			const star = createStar(starColor);
 			this._resetStar(star, focalLen, 0.12 + 0.86 * Math.random());

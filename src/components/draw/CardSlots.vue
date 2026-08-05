@@ -1,14 +1,13 @@
 <template>
   <div
     v-if="visible"
-    class="flex items-center justify-center gap-4 sm:gap-6"
-    style="transform: translateY(-32px);"
+    class="slots-row flex items-center justify-center gap-4 sm:gap-6"
+    style="transform: translateY(-8px);"
   >
     <div
       v-for="slot in slotCount"
       :key="slot"
       class="slot-item flex flex-col items-center gap-1.5"
-      :style="{ animationDelay: `${(slot - 1) * 80}ms` }"
     >
       <div
         class="slot-card relative overflow-hidden rounded-lg"
@@ -41,6 +40,7 @@
       >
         {{ positionLabel(slot - 1) }}
       </span>
+
     </div>
   </div>
 </template>
@@ -68,11 +68,16 @@ function positionLabel(index) {
 function cardLabel(index) {
   return props.draw?.cards?.[index]?.card_name ?? "";
 }
+
 </script>
 
 <style scoped>
+.slots-row {
+  animation: slotsRowAppear 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
 .slot-item {
-  animation: slotAppear 320ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation: none;
 }
 
 .slot-flip {
@@ -95,18 +100,22 @@ function cardLabel(index) {
   transform: rotateY(180deg);
 }
 
-@keyframes slotAppear {
+@keyframes slotsRowAppear {
   from {
     opacity: 0;
-    transform: translateY(8px) scale(0.92);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateY(0);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .slots-row {
+    animation: none !important;
+  }
+
   .slot-item {
     animation: none !important;
   }

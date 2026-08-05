@@ -30,26 +30,42 @@
 
 <script setup>
 import { onBeforeUnmount, onMounted, ref } from "vue";
-import NebulaClouds from "../assets/NebulaClouds.js";
-import Starfield from "../assets/Starfield.js";
 
 const starCanvasRef = ref(null);
 const cloudCanvasRef = ref(null);
 let starfield = null;
 let nebula = null;
+let startCancelled = false;
+let nebulaStartId = 0;
 
-onMounted(() => {
+async function startBackgroundEffects() {
+  const [{ default: Starfield }, { default: NebulaClouds }] = await Promise.all([
+    import("../assets/Starfield.js"),
+    import("../assets/NebulaClouds.js"),
+  ]);
+
+  if (startCancelled) return;
+
   if (starCanvasRef.value) {
     starfield = new Starfield(starCanvasRef.value);
     starfield.start();
   }
-  if (cloudCanvasRef.value) {
+
+  // Delay the heavier nebula pass so the first screen paints sooner.
+  nebulaStartId = window.setTimeout(() => {
+    if (startCancelled || !cloudCanvasRef.value) return;
     nebula = new NebulaClouds(cloudCanvasRef.value);
     nebula.start();
-  }
+  }, 900);
+}
+
+onMounted(() => {
+  startBackgroundEffects();
 });
 
 onBeforeUnmount(() => {
+  startCancelled = true;
+  window.clearTimeout(nebulaStartId);
   starfield?.destroy();
   nebula?.destroy();
 });

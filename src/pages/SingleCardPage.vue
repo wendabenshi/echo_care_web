@@ -4,16 +4,17 @@
 
     <DrawToast :message="toastMessage" />
 
-    <ReadingPanel
+    <DailyReadingPanel
       :visible="showReading"
       :loading="readingLoading"
-      :question="submittedQuestion"
       :reading="readingText"
+      :reading-data="readingData"
       :slots="readingSlots"
-      reading-label="Single Card Reading"
-      reading-title="Your card reading"
-      draw-again-label="Draw another card"
-      @close="resetSession"
+      :reading-label="isDailyMode ? `Today's Companion` : 'Single Card Reading'"
+      :reading-title="isDailyMode ? 'Your companion message' : 'Your card reading'"
+      :draw-again-label='isDailyMode ? "Draw your daily card again" : "Draw another card"'
+      @close="handleClose"
+      @follow-up="handleFollowUp"
     />
 
     <main class="relative z-[1] min-h-[100dvh] pt-16">
@@ -27,23 +28,39 @@
         <div class="relative z-10 flex min-h-[calc(100dvh-4rem)] flex-col items-center px-4 pt-16 pb-0 md:pt-20">
           <div class="relative z-20 mx-auto w-full max-w-3xl space-y-4 text-center">
             <p class="text-[10px] md:text-xs uppercase tracking-[0.2em] text-[#7C74E7]/80">
-              One Card
+              {{ isDailyMode ? "Today's Card" : (submitted && draw?.spread_name ? draw.spread_name : "One Card") }}
             </p>
 
             <h1 class="font-serif text-2xl font-normal leading-tight text-white sm:text-3xl md:text-4xl">
-              Close your eyes.<br />
-              Bring your question to mind.
+              <template v-if="isDailyMode">
+                How are you today?
+              </template>
+              <template v-else>
+                Close your eyes.<br />
+                Bring your question to mind.
+              </template>
             </h1>
 
-            <p class="text-xs text-white/35 md:text-sm">One card will answer</p>
+            <p class="text-xs text-white/35 md:text-sm">
+              {{ isDailyMode ? "Draw your card for today's energy." : "One card will answer" }}
+            </p>
 
-            <QuestionBar
-              v-model="question"
-              :submitted="submitted"
-              :submitted-question="submittedQuestion"
-              placeholder="What do I need to know today?"
-              @submit="onSubmit"
-            />
+            <div
+              class="draw-collapse"
+              :class="{ 'draw-collapse--closed': isDailyMode && submitted }"
+              :aria-hidden="isDailyMode && submitted"
+            >
+              <div class="overflow-hidden" style="min-height: 0;">
+                <QuestionBar
+                  v-model="question"
+                  :submitted="submitted"
+                  :submitted-question="submittedQuestion"
+                  :show-submitted-question="!isDailyMode"
+                  :placeholder="isDailyMode ? 'How are you feeling today?' : 'What do I need to know today?'"
+                  @submit="onSubmit"
+                />
+              </div>
+            </div>
 
             <CardSlots
               :visible="submitted"
@@ -61,7 +78,7 @@
               <div class="overflow-hidden" style="min-height: 0;">
                 <div class="mx-auto flex max-w-2xl flex-wrap items-center justify-center gap-2 pt-1">
                   <button
-                    v-for="chip in suggestionChips"
+                  v-for="chip in suggestionChips"
                     :key="chip"
                     type="button"
                     class="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 text-[11px] text-white/55 transition hover:border-white/25 hover:bg-white/[0.06] hover:text-white/85 md:text-xs"
@@ -80,10 +97,10 @@
             >
               <div class="overflow-hidden" style="min-height: 0;">
                 <RouterLink
-                  to="/draw/love-energy"
+                  :to="isDailyMode ? '/draw/love-energy' : '/draw/love-energy'"
                   class="inline-block text-[10px] text-[#7C74E7]/40 transition-colors hover:text-[#7C74E7]/70 md:text-xs"
                 >
-                  or try a three-card love reading
+                  {{ isDailyMode ? "or ask a deeper question" : "or try a three-card love reading" }}
                 </RouterLink>
               </div>
             </div>
@@ -104,23 +121,26 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, ref } from "vue";
-import { RouterLink } from "vue-router";
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from "vue";
+import { RouterLink, useRoute } from "vue-router";
 import CardFan from "../components/draw/CardFan.vue";
 import CardSlots from "../components/draw/CardSlots.vue";
 import DrawToast from "../components/draw/DrawToast.vue";
 import QuestionBar from "../components/draw/QuestionBar.vue";
-import ReadingPanel from "../components/draw/ReadingPanel.vue";
+import DailyReadingPanel from "../components/draw/DailyReadingPanel.vue";
 import StarfieldBackground from "../components/StarfieldBackground.vue";
 import {
   resolveSlotCards,
   simulateSingleDraw,
   simulateSingleInterpret,
 } from "../services/drawSession.js";
+import { trackRingEvent } from "../utils/ringAnalytics.js";
 
 const PICK_LIMIT = 1;
+const DAILY_QUESTION = "What do I need to know today?";
 
-const question = ref("What do I need to know today?");
+const route = useRoute();
+const question = ref(DAILY_QUESTION);
 const submitted = ref(false);
 const submittedQuestion = ref("");
 const draw = ref(null);
@@ -130,13 +150,24 @@ const pickingEnabled = ref(false);
 const showReading = ref(false);
 const readingLoading = ref(false);
 const readingText = ref("");
+const readingData = ref(null);
 const toastMessage = ref("");
+const autoStarted = ref(false);
+const isDailyMode = computed(() => route.query.mode === "daily");
 
-const suggestionChips = [
-  "What energy surrounds me today?",
-  "What should I focus on?",
-  "What is my next step?",
-];
+const suggestionChips = computed(() =>
+  isDailyMode.value
+    ? [
+        "How am I arriving today?",
+        "What needs my attention today?",
+        "What would support me most today?",
+      ]
+    : [
+        "What energy surrounds me today?",
+        "What should I focus on?",
+        "What is my next step?",
+      ],
+);
 
 const picksRemaining = computed(() => Math.max(0, PICK_LIMIT - pickedFanIndices.value.length));
 
@@ -175,9 +206,10 @@ async function onSubmit(text) {
   flippedSlots.value = [false];
   showReading.value = false;
   readingText.value = "";
+  readingData.value = null;
 
   try {
-    draw.value = await simulateSingleDraw(text);
+    draw.value = await simulateSingleDraw(text, { mode: isDailyMode.value ? "daily" : "single" });
     schedule(() => {
       pickingEnabled.value = true;
     }, 900);
@@ -185,6 +217,13 @@ async function onSubmit(text) {
     showToast("The cards aren't speaking right now");
     submitted.value = false;
   }
+}
+
+function maybeStartDailyFlow() {
+  if (route.query.mode !== "daily" || autoStarted.value || submitted.value) return;
+  autoStarted.value = true;
+  question.value = DAILY_QUESTION;
+  onSubmit(DAILY_QUESTION);
 }
 
 function onPickCard(fanIndex) {
@@ -211,9 +250,13 @@ async function openReading() {
   showReading.value = true;
   readingLoading.value = true;
   readingText.value = "";
+  readingData.value = null;
 
   try {
-    readingText.value = await simulateSingleInterpret(submittedQuestion.value, draw.value);
+    readingData.value = await simulateSingleInterpret(submittedQuestion.value, draw.value, {
+      mode: isDailyMode.value ? "daily" : "single",
+    });
+    trackRingEvent("reading_completed", { mode: isDailyMode.value ? "daily" : "single" });
   } catch {
     readingText.value = "The card drew close, but the reading couldn't fully arrive. Try again when you're ready.";
   } finally {
@@ -221,10 +264,26 @@ async function openReading() {
   }
 }
 
+function handleFollowUp(nextQuestion) {
+  question.value = nextQuestion;
+  resetSession();
+}
+
+async function handleClose() {
+  resetSession();
+
+  if (!isDailyMode.value) return;
+
+  autoStarted.value = false;
+  await nextTick();
+  maybeStartDailyFlow();
+}
+
 function resetSession() {
   showReading.value = false;
   readingLoading.value = false;
   readingText.value = "";
+  readingData.value = null;
   submitted.value = false;
   submittedQuestion.value = "";
   draw.value = null;
@@ -235,6 +294,10 @@ function resetSession() {
 
 onBeforeUnmount(() => {
   timers.forEach(clearTimeout);
+});
+
+onMounted(() => {
+  maybeStartDailyFlow();
 });
 </script>
 

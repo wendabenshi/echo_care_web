@@ -18,6 +18,24 @@ export function createLoveEnergyDraw(question) {
   };
 }
 
+async function requestSpread(question, mode) {
+  const response = await fetch("/api/spread", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({ question, mode }),
+  });
+
+  const result = await response.json().catch(() => null);
+  if (!response.ok || !result?.ok) {
+    throw new Error(result?.error ?? "Spread generation failed");
+  }
+
+  return result.spread;
+}
+
 export function resolveSlotCards(draw) {
   return draw.cards.map((entry) => getCardByLabel(entry.card_name)).filter(Boolean);
 }
@@ -38,16 +56,49 @@ export function generateReading(question, draw) {
   return [intro, ...sections, closing].filter(Boolean).join("\n\n");
 }
 
+function buildReadingRequest(question, draw) {
+  const cards = resolveSlotCards(draw);
+  return {
+    question,
+    spreadTitle: draw.spread_name,
+    positions: [...draw.position_meanings],
+    cards: cards.map((card, index) => ({
+      position: draw.position_meanings[index] ?? "",
+      name: card.label,
+      meaning: card.loveMeaning,
+    })),
+  };
+}
+
 /** Simulates network latency for draw + interpret. */
 export function simulateDraw(question) {
-  return new Promise((resolve) => {
-    window.setTimeout(() => resolve(createLoveEnergyDraw(question)), 450);
-  });
+  return requestSpread(question, "love-energy").then((spread) => ({
+    question,
+    spread_name: spread.spreadTitle || "Love Energy",
+    position_meanings:
+      spread.positions?.map((item) => item.title).filter(Boolean).slice(0, 3) || [...LOVE_ENERGY_POSITIONS],
+    position_tags:
+      spread.positions?.map((item) => Array.isArray(item.tags) ? item.tags : []).slice(0, 3) || [],
+    cards: pickDistinctCards(3).map((card) => ({
+      card_name: card.label,
+    })),
+  }));
 }
 
 export function simulateInterpret(question, draw) {
-  return new Promise((resolve) => {
-    window.setTimeout(() => resolve(generateReading(question, draw)), 900);
+  return fetch("/api/reading", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(buildReadingRequest(question, draw)),
+  }).then(async (response) => {
+    const result = await response.json().catch(() => null);
+    if (!response.ok || !result?.ok) {
+      throw new Error(result?.error ?? "Reading failed");
+    }
+    return result.reading;
   });
 }
 
@@ -78,14 +129,38 @@ export function generateSingleReading(question, draw) {
   return [intro, body, closing].join("\n\n");
 }
 
-export function simulateSingleDraw(question) {
-  return new Promise((resolve) => {
-    window.setTimeout(() => resolve(createSingleCardDraw(question)), 450);
-  });
+export function simulateSingleDraw(question, options = {}) {
+  const mode = options.mode === "daily" ? "daily" : "single-card";
+
+  return requestSpread(question, mode).then((spread) => ({
+    question,
+    spread_name: spread.spreadTitle || "Single Card",
+    position_meanings:
+      spread.positions?.map((item) => item.title).filter(Boolean).slice(0, 1) || [...SINGLE_CARD_POSITIONS],
+    position_tags:
+      spread.positions?.map((item) => Array.isArray(item.tags) ? item.tags : []).slice(0, 1) || [],
+    cards: pickDistinctCards(1).map((card) => ({
+      card_name: card.label,
+    })),
+  }));
 }
 
-export function simulateSingleInterpret(question, draw) {
-  return new Promise((resolve) => {
-    window.setTimeout(() => resolve(generateSingleReading(question, draw)), 900);
+export function simulateSingleInterpret(question, draw, options = {}) {
+  return fetch("/api/reading", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({
+      ...buildReadingRequest(question, draw),
+      mode: options.mode === "daily" ? "daily" : "single-card",
+    }),
+  }).then(async (response) => {
+    const result = await response.json().catch(() => null);
+    if (!response.ok || !result?.ok) {
+      throw new Error(result?.error ?? "Reading failed");
+    }
+    return result.reading;
   });
 }

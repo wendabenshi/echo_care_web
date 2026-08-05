@@ -1,5 +1,5 @@
 <template>
-  <div class="relative mx-auto grid w-full max-w-2xl" style="grid-template-columns: 1fr;">
+  <div class="relative mx-auto grid w-full max-w-2xl overflow-hidden rounded-full" style="grid-template-columns: 1fr;">
     <!-- input row -->
     <div
       class="draw-swap-fast grid grid-cols-[1fr_auto] items-center rounded-full border border-white/20 bg-white/[0.06] pr-1.5 has-[input:focus]:ring-2 has-[input:focus]:ring-white/15"
@@ -57,12 +57,16 @@ const props = defineProps({
   modelValue: { type: String, default: "" },
   submitted: { type: Boolean, default: false },
   submittedQuestion: { type: String, default: "" },
+  showSubmittedQuestion: { type: Boolean, default: true },
   placeholder: { type: String, default: "When will real love show up?" },
 });
 
 const emit = defineEmits(["update:modelValue", "submit"]);
 
 const localQuestion = ref(props.modelValue);
+const hasSubmittedQuestion = computed(
+  () => props.showSubmittedQuestion && Boolean(props.submittedQuestion?.trim()),
+);
 
 watch(
   () => props.modelValue,
@@ -80,15 +84,18 @@ const inputLayerStyle = computed(() => ({
   backdropFilter: "blur(24px)",
   boxShadow:
     "0 0 30px rgba(255,255,255,0.2), 0 0 70px rgba(255,255,255,0.12), 0 0 120px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.15)",
-  opacity: props.submitted ? 0 : 1,
-  transform: props.submitted ? "scale(0.98)" : "scale(1)",
-  pointerEvents: props.submitted ? "none" : "auto",
+  opacity: props.submitted && hasSubmittedQuestion.value ? 0 : 1,
+  transform: props.submitted && hasSubmittedQuestion.value ? "scale(0.98)" : "scale(1)",
+  pointerEvents: props.submitted && hasSubmittedQuestion.value ? "none" : "auto",
 }));
 
 const quoteLayerStyle = computed(() => ({
   gridArea: "1 / 1",
-  opacity: props.submitted ? 1 : 0,
-  transform: props.submitted ? "translateY(0) scale(1)" : "translateY(8px) scale(0.98)",
+  opacity: props.submitted && hasSubmittedQuestion.value ? 1 : 0,
+  transform:
+    props.submitted && hasSubmittedQuestion.value
+      ? "translateY(0) scale(1)"
+      : "translateY(8px) scale(0.98)",
   pointerEvents: "none",
 }));
 

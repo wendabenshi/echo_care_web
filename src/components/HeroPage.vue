@@ -1,13 +1,6 @@
 <template>
   <div class="hero-page relative flex min-h-[100dvh] w-full justify-center overflow-hidden bg-[#18161D]">
-    <StarfieldBackground />
-
-    <!-- intro veil -->
-    <div
-      class="pointer-events-none absolute inset-0 z-30 bg-black transition-opacity duration-700 ease-out"
-      :class="introDone ? 'opacity-0' : 'opacity-100'"
-      aria-hidden="true"
-    />
+    <StarfieldBackground v-if="showBackground" />
 
     <div
       class="hero-page__frame relative z-10 flex w-full max-w-[430px] flex-col"
@@ -75,7 +68,7 @@ import BreathingRing from "./BreathingRing.vue";
 import CompanionText from "./CompanionText.vue";
 import StarfieldBackground from "./StarfieldBackground.vue";
 
-const introDone = ref(false);
+const showBackground = ref(false);
 const ringAwake = ref(false);
 const ringFormed = ref(false);
 const textVisible = ref(false);
@@ -93,17 +86,20 @@ function onGather(active) {
 
 onMounted(() => {
   schedule(() => {
-    introDone.value = true;
+    showBackground.value = true;
+  }, 120);
+
+  schedule(() => {
     ringAwake.value = true;
-  }, 500);
+  }, 60);
 
   schedule(() => {
     ringFormed.value = true;
-  }, 900);
+  }, 180);
 
   schedule(() => {
     textVisible.value = true;
-  }, 1400);
+  }, 260);
 });
 
 onBeforeUnmount(() => {
