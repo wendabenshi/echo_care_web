@@ -13,7 +13,7 @@
       :reading-data="readingData"
       :slots="readingSlots"
       @close="resetSession"
-      @follow-up="handleFollowUp"
+      @home="goToHome"
     />
 
     <main class="relative z-[1] min-h-[100dvh] pt-16">
@@ -167,12 +167,32 @@ const FAN_INTERACTION_DELAY_MS = 280;
 const picksRemaining = computed(() => Math.max(0, 3 - pickedFanIndices.value.length));
 const drawReady = computed(() => submitted.value && Boolean(draw.value));
 
+function getHeroPositionLabel(position = "", index = 0) {
+  const normalized = String(position).replace(/\s+/g, " ").trim().toLowerCase();
+  const mapped = {
+    "your heart today": "Current Readiness",
+    "what’s influencing this": "Necessary Preparation",
+    "what's influencing this": "Necessary Preparation",
+    "where to focus": "Timing And Signs",
+    "my heart's current song": "Current Readiness",
+    "nurturing the path forward": "Necessary Preparation",
+    "the embrace awaiting": "Timing And Signs",
+  };
+
+  if (mapped[normalized]) return mapped[normalized];
+
+  const fallback = ["Current Readiness", "Necessary Preparation", "Timing And Signs"];
+  return fallback[index] ?? position;
+}
+
 const readingSlots = computed(() => {
   if (!draw.value) return [];
   const cards = resolveSlotCards(draw.value);
   return cards.map((card, index) => ({
     label: card.label,
     position: draw.value.position_meanings[index] ?? "",
+    heroPosition: getHeroPositionLabel(draw.value.position_meanings[index] ?? "", index),
+    tags: Array.isArray(draw.value.position_tags?.[index]) ? draw.value.position_tags[index] : [],
   }));
 });
 
@@ -274,9 +294,9 @@ async function openReading() {
   }
 }
 
-function handleFollowUp(nextQuestion) {
-  question.value = nextQuestion;
+function goToHome() {
   resetSession();
+  router.push("/");
 }
 
 function resetSession() {

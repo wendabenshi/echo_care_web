@@ -6,6 +6,154 @@ export const LOVE_ENERGY_POSITIONS = [
 
 export const SINGLE_CARD_POSITIONS = ["The message for you today"];
 
+export const DAILY_GLANCE_COPY = {
+  "The Fool": {
+    today: "New Horizon",
+    heart: "Open To Wonder",
+    step: "Start Anyway",
+  },
+  "The Magician": {
+    today: "Focused Momentum",
+    heart: "Ready To Act",
+    step: "Use What's Here",
+  },
+  "The High Priestess": {
+    today: "Quiet Knowing",
+    heart: "Reading Signals",
+    step: "Wait A Beat",
+  },
+  "The Empress": {
+    today: "Gentle Warmth",
+    heart: "Ready To Receive",
+    step: "Nurture It",
+  },
+  "The Emperor": {
+    today: "Steady Control",
+    heart: "Holding Boundaries",
+    step: "Name The Need",
+  },
+  "The Lovers": {
+    today: "Meaningful Choice",
+    heart: "Pulled Both Ways",
+    step: "Choose Honestly",
+  },
+  "The Chariot": {
+    today: "Forward Push",
+    heart: "Finding Direction",
+    step: "Stay The Course",
+  },
+  "Strength": {
+    today: "Soft Courage",
+    heart: "Holding Steady",
+    step: "Respond Gently",
+  },
+  "The Hermit": {
+    today: "Need For Space",
+    heart: "Sorting Thoughts",
+    step: "Step Back",
+  },
+  "Wheel of Fortune": {
+    today: "Turning Point",
+    heart: "Watching Change",
+    step: "Stay Flexible",
+  },
+  "Justice": {
+    today: "Truth Matters",
+    heart: "Weighing Fairness",
+    step: "Be Clear",
+  },
+  "The Hanged Man": {
+    today: "Pause Required",
+    heart: "Seeing Differently",
+    step: "Hold Off",
+  },
+  "Death": {
+    today: "Ending Season",
+    heart: "Ready To Release",
+    step: "Let It Go",
+  },
+  "Temperance": {
+    today: "Slow Balance",
+    heart: "Settling Down",
+    step: "Take Half Steps",
+  },
+  "The Devil": {
+    today: "Old Pull",
+    heart: "Caught In Loops",
+    step: "Break The Pattern",
+  },
+  "The Tower": {
+    today: "Sudden Truth",
+    heart: "Shaken Open",
+    step: "Face It",
+  },
+  "The Star": {
+    today: "Hope Returns",
+    heart: "Breathing Easier",
+    step: "Try Again",
+  },
+  "The Moon": {
+    today: "Finding Clarity",
+    heart: "Sorting Feelings",
+    step: "Pause Before Deciding",
+  },
+  "The Sun": {
+    today: "Clear Warmth",
+    heart: "More Open",
+    step: "Say It Plainly",
+  },
+  "Judgement": {
+    today: "Wake Up Call",
+    heart: "Hearing It",
+    step: "Answer Honestly",
+  },
+  "The World": {
+    today: "Cycle Closing",
+    heart: "Feeling Whole",
+    step: "Finish It",
+  },
+  "Two of Cups": {
+    today: "Shared Feeling",
+    heart: "Seeking Mutuality",
+    step: "Meet Halfway",
+  },
+  "Three of Cups": {
+    today: "Lightness Returns",
+    heart: "Wanting Company",
+    step: "Reach Out",
+  },
+  "Ace of Cups": {
+    today: "Emotional Opening",
+    heart: "Ready To Receive",
+    step: "Express Something Real",
+  },
+  "Ten of Cups": {
+    today: "Homeward Feeling",
+    heart: "Wanting Harmony",
+    step: "Protect The Bond",
+  },
+  "Two of Swords": {
+    today: "Decision Pending",
+    heart: "Still Guarded",
+    step: "Stop Avoiding",
+  },
+  "Three of Swords": {
+    today: "Tender Aftermath",
+    heart: "Still Hurting",
+    step: "Name The Pain",
+  },
+  "Queen of Cups": {
+    today: "Deep Feeling",
+    heart: "Sensitive Today",
+    step: "Speak Softly",
+  },
+  "Knight of Cups": {
+    today: "Heart In Motion",
+    heart: "Ready To Reach",
+    step: "Send The Message",
+  },
+};
+
 export function slugify(label) {
   return label
     .toLowerCase()
@@ -62,6 +210,10 @@ export const TAROT_CARDS = [
 
 export function getCardByLabel(label) {
   return TAROT_CARDS.find((card) => card.label === label) ?? null;
+}
+
+export function getDailyGlanceCopy(label) {
+  return DAILY_GLANCE_COPY[label] ?? null;
 }
 
 export function shuffle(items) {

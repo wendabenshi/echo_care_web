@@ -15,12 +15,14 @@
       />
 
       <div class="relative z-10 h-full overflow-y-auto">
-        <div class="mx-auto flex min-h-full w-full max-w-[430px] flex-col px-8 py-12 md:max-w-[900px] md:px-12 md:py-16">
-          <p class="text-[10px] uppercase tracking-[0.24em] text-[#7C74E7]/80">Your Question</p>
+        <div class="mx-auto flex min-h-full w-full max-w-[430px] flex-col px-4 py-12 md:max-w-[900px] md:px-12 md:py-16">
+          <div class="text-center">
+            <p class="text-[10px] uppercase tracking-[0.28em] text-[rgba(189,176,230,0.82)]">Your Question</p>
 
-          <h2 class="mt-5 max-w-[720px] font-serif text-[1.82rem] font-normal leading-[1.12] text-white md:text-[3.15rem]">
-            “{{ question }}”
-          </h2>
+            <h2 class="mx-auto mt-2.5 max-w-[320px] font-woomoo-serif text-[1.2rem] font-normal italic leading-[1.3] text-white/54 md:max-w-[520px] md:text-[1.9rem]">
+              “{{ question }}”
+            </h2>
+          </div>
 
           <div v-if="loading" class="mt-10 flex flex-col items-center gap-4 py-16">
             <div class="h-8 w-8 animate-spin rounded-full border-2 border-white/15 border-t-[#B8A4FF]" />
@@ -28,47 +30,60 @@
           </div>
 
           <template v-else>
-            <div class="mt-12 flex items-start justify-between gap-5 md:mt-16 md:gap-12">
+            <div class="mt-8 flex items-start justify-between gap-2.5 md:mt-11 md:gap-9">
               <div
                 v-for="(slot, index) in slots"
                 :key="slot.label"
-                class="flex min-w-0 flex-1 flex-col items-center gap-3.5"
+                class="flex min-w-0 flex-1 flex-col items-center gap-2.5"
               >
-                <div class="h-[176px] w-[110px] overflow-hidden rounded-[18px] ring-1 ring-white/10 shadow-[0_18px_42px_rgba(0,0,0,0.32)] md:h-[336px] md:w-[210px] md:rounded-[24px]">
+                <div class="h-[148px] w-[92px] overflow-hidden rounded-[17px] ring-1 ring-white/10 shadow-[0_14px_34px_rgba(0,0,0,0.28)] md:h-[304px] md:w-[188px] md:rounded-[23px]">
                   <TarotCardFace :label="slot.label" />
                 </div>
-                <p class="text-center font-serif text-[0.68rem] leading-tight text-white/58 md:text-[0.9rem]">
-                  {{ slot.label }}
-                </p>
+                <div class="space-y-1 text-center">
+                  <p class="hero-slot-position font-woomoo-ui">
+                    {{ slot.heroPosition || slot.position || `Card ${index + 1}` }}
+                  </p>
+                  <p class="font-woomoo-body text-[0.78rem] leading-tight text-white/82 md:text-[0.96rem]">
+                    {{ slot.label }}
+                  </p>
+                </div>
               </div>
             </div>
 
-            <div v-if="hasStructuredReading" class="mx-auto mt-14 w-full max-w-[620px] text-center md:mt-14">
-              <p class="text-[10px] uppercase tracking-[0.24em] text-[#7C74E7]/80">Your Three-Card Insight</p>
-              <p class="hero-insight-copy mx-auto mt-5 max-w-[540px] font-serif text-[1.16rem] leading-[1.48] text-white md:text-[1.72rem]">
+            <div v-if="hasStructuredReading" class="mx-auto mt-10 w-full max-w-[620px] text-center md:mt-11">
+              <h3 class="font-woomoo-serif text-[1.16rem] font-normal leading-[1.18] text-white md:text-[1.86rem]">
+                Your Three-Card Insight
+              </h3>
+              <p class="hero-insight-copy mx-auto mt-3 max-w-[380px] font-woomoo-body text-[0.92rem] leading-[1.68] text-white/46 md:max-w-[660px] md:text-[1.04rem]">
                 {{ heroInsight }}
               </p>
             </div>
 
-            <div v-if="hasStructuredReading" class="mx-auto mt-16 w-full max-w-[760px] space-y-14 md:mt-16 md:space-y-16">
-              <div class="mr-6 space-y-6 md:mr-6">
+            <div v-if="hasStructuredReading" class="mx-auto mt-8 w-full max-w-[760px] space-y-14 md:mt-10 md:space-y-16">
+              <div class="space-y-5 md:mr-6 md:space-y-6">
                 <section
                   v-for="section in cardSections"
                   :key="section.label"
                   class="reading-card-section"
                 >
-                  <p class="text-[10px] uppercase tracking-[0.24em] text-[#7C74E7]/80">{{ section.label }}</p>
-                  <h3 class="mt-3 font-serif text-[1.28rem] font-normal leading-[1.18] text-white md:text-[1.75rem]">
+                  <p class="text-[9px] uppercase tracking-[0.2em] text-[rgba(189,176,230,0.82)]">{{ section.label }}</p>
+                  <h3 class="mt-3 font-woomoo-body text-[1.18rem] font-medium leading-[1.24] tracking-[-0.01em] text-[rgba(244,240,248,0.84)] md:text-[1.4rem]">
                     {{ section.card }}
                   </h3>
-                  <p class="mt-1.5 max-w-[450px] font-serif text-[0.94rem] leading-[1.52] text-[#A99AE6] md:text-[1.16rem]">
-                    {{ section.headline }}
-                  </p>
-                  <div class="mt-3 max-w-[448px] space-y-3.5">
+                  <div v-if="section.tags.length" class="mt-2.5 flex flex-wrap gap-1.5">
+                    <span
+                      v-for="tag in section.tags"
+                      :key="tag"
+                      class="reading-card-chip"
+                    >
+                      {{ tag }}
+                    </span>
+                  </div>
+                  <div v-if="section.paragraphs.length" class="mt-[0.66rem] max-w-[476px] space-y-[0.16rem]">
                     <p
-                      v-for="(paragraph, paragraphIndex) in section.bodyParagraphs"
+                      v-for="(paragraph, paragraphIndex) in section.paragraphs"
                       :key="paragraphIndex"
-                      class="text-[0.9rem] leading-[1.82] text-white/52 md:text-[0.96rem]"
+                      class="font-woomoo-body text-[0.9rem] leading-[1.14] text-[rgba(214,210,223,0.5)] md:text-[0.95rem]"
                     >
                       {{ paragraph }}
                     </p>
@@ -78,49 +93,43 @@
 
               <section v-if="biggerPictureSection" class="bigger-picture-card max-w-[620px]">
                 <p class="text-[10px] uppercase tracking-[0.24em] text-[#7C74E7]/80">The Bigger Picture</p>
-                <h3 class="mt-4 font-serif text-[1.45rem] font-normal leading-[1.16] text-white md:text-[2rem]">
-                  Putting It All Together
-                </h3>
-                <p class="mt-4 max-w-[500px] font-serif text-[1.06rem] leading-[1.48] text-[#D5C7FF] md:text-[1.34rem]">
+                <div v-if="cardSections.length" class="bigger-picture-chip-row">
+                  <span
+                    v-for="section in cardSections"
+                    :key="`bigger-picture-${section.card}`"
+                    class="bigger-picture-chip"
+                  >
+                    {{ section.card }}
+                  </span>
+                </div>
+                <p class="bigger-picture-kicker">What The Cards Are Saying</p>
+                <p class="bigger-picture-lead">
                   {{ biggerPictureSection.headline }}
                 </p>
-                <div class="mt-5 max-w-[470px] space-y-3.5">
-                  <p
-                    v-for="(paragraph, paragraphIndex) in biggerPictureSection.bodyParagraphs"
-                    :key="paragraphIndex"
-                    class="text-[0.9rem] leading-[1.82] text-white/62 md:text-[0.96rem]"
-                  >
-                    {{ paragraph }}
-                  </p>
-                </div>
-              </section>
-
-              <section v-if="gentleReminderSection" class="max-w-[560px]">
-                <p class="text-[10px] uppercase tracking-[0.24em] text-[#7C74E7]/80">A Gentle Reminder</p>
-                <p class="mt-3 max-w-[500px] font-serif text-[1.04rem] leading-[1.52] text-white md:text-[1.34rem]">
-                  {{ gentleReminderSection.headline }}
+                <p
+                  v-if="biggerPictureSupportingText"
+                  class="bigger-picture-supporting"
+                >
+                  {{ biggerPictureSupportingText }}
                 </p>
-                <div class="mt-3 max-w-[448px] space-y-3.5">
-                  <p
-                    v-for="(paragraph, paragraphIndex) in gentleReminderSection.bodyParagraphs"
-                    :key="paragraphIndex"
-                    class="text-[0.9rem] leading-[1.82] text-white/52 md:text-[0.96rem]"
-                  >
-                    {{ paragraph }}
-                  </p>
-                </div>
               </section>
 
-              <div v-if="(props.readingData?.followUps ?? []).length" class="pt-0">
+              <section v-if="gentleReminderSection" class="gentle-guidance-card max-w-[620px]">
+                <p class="gentle-guidance-label">✦ A Gentle Reminder ✦</p>
+                <p class="gentle-guidance-copy">
+                  {{ gentleReminderText }}
+                </p>
+              </section>
+
+              <div class="pt-0">
                 <button
                   type="button"
-                  class="flex w-full items-center justify-between rounded-full bg-[linear-gradient(90deg,#6B3FD4_0%,#7F49E2_55%,#8E55F0_100%)] px-8 py-4 font-serif text-[1.1rem] text-white shadow-[0_18px_44px_rgba(92,55,196,0.34)] transition hover:brightness-110 active:scale-[0.995] md:text-[1.28rem]"
-                  @click="$emit('follow-up', props.readingData.followUps[0])"
+                  class="reading-home-cta"
+                  @click="$emit('home')"
                 >
-                  <span class="mx-auto">Ask a follow-up</span>
-                  <span class="ml-4 text-[1.7rem] text-white/92">→</span>
+                  <span class="reading-home-cta-label">Back to Home</span>
+                  <span class="reading-home-cta-arrow" aria-hidden="true">→</span>
                 </button>
-                <p class="mt-5 text-center text-[0.95rem] text-white/28">Explore this further with AI.</p>
               </div>
             </div>
 
@@ -163,7 +172,7 @@ const props = defineProps({
   },
 });
 
-defineEmits(["close", "follow-up"]);
+defineEmits(["close", "home"]);
 
 let restoreScrollLock = null;
 
@@ -231,7 +240,7 @@ function toReadingSection(text = "") {
   const sentences = sentenceSplit(text).map((sentence) => sentence.trim()).filter(Boolean);
   if (!sentences.length) return { headline: "", bodyParagraphs: [] };
   const [headline, ...rest] = sentences;
-  const bodyParagraphs = groupSentences(rest.length ? rest : [headline], 2);
+  const bodyParagraphs = rest.length ? groupSentences(rest, 2) : [];
 
   return {
     headline: headline.trim(),
@@ -276,8 +285,8 @@ const cardSections = computed(() =>
     return {
       label: cardSectionLabels[index] ?? item.position ?? "",
       card: item.card ?? "",
-      headline: parsed.headline,
-      bodyParagraphs: parsed.bodyParagraphs,
+      tags: Array.isArray(props.slots?.[index]?.tags) ? props.slots[index].tags.slice(0, 3) : [],
+      paragraphs: [parsed.headline, ...parsed.bodyParagraphs].filter(Boolean),
     };
   }),
 );
@@ -288,10 +297,20 @@ const biggerPictureSection = computed(() => {
   return parsed;
 });
 
+const biggerPictureSupportingText = computed(() => {
+  if (!biggerPictureSection.value) return "";
+  return biggerPictureSection.value.bodyParagraphs.join(" ").trim();
+});
+
 const gentleReminderSection = computed(() => {
   const parsed = toReadingSection(props.readingData?.gentleReminder ?? "");
   if (!parsed.headline) return null;
   return parsed;
+});
+
+const gentleReminderText = computed(() => {
+  if (!gentleReminderSection.value) return "";
+  return [gentleReminderSection.value.headline, ...gentleReminderSection.value.bodyParagraphs].join(" ").trim();
 });
 
 watch(
@@ -320,29 +339,63 @@ onBeforeUnmount(() => {
   -webkit-line-clamp: 2;
 }
 
-.reading-card-section {
-  max-width: 560px;
-  border-radius: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.055);
-  background: rgba(255, 255, 255, 0.055);
-  padding: 28px 24px 30px;
-  box-shadow:
-    0 18px 44px rgba(0, 0, 0, 0.16),
-    inset 0 1px 0 rgba(255, 255, 255, 0.025);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+.hero-slot-position {
+  max-width: 6.9rem;
+  margin: 0 auto;
+  font-size: 0.5rem;
+  text-transform: uppercase;
+  line-height: 1.18;
+  letter-spacing: 0.16em;
+  color: rgba(255, 255, 255, 0.28);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-@supports not ((backdrop-filter: blur(8px)) or (-webkit-backdrop-filter: blur(8px))) {
-  .reading-card-section {
-    background: rgba(255, 255, 255, 0.08);
+@media (min-width: 768px) {
+  .hero-slot-position {
+    max-width: 10rem;
+    font-size: 0.68rem;
+    letter-spacing: 0.18em;
   }
+}
+
+.reading-card-section {
+  max-width: 100%;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.022);
+  background:
+    linear-gradient(180deg, rgba(34, 31, 42, 0.95) 0%, rgba(31, 28, 39, 0.92) 100%);
+  padding: 20px 17px 22px;
+  box-shadow:
+    0 8px 20px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.012);
+}
+
+@media (min-width: 768px) {
+  .reading-card-section {
+    max-width: 560px;
+    border-radius: 22px;
+    padding: 22px 20px 24px;
+  }
+}
+
+.reading-card-chip {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.028);
+  padding: 0.3rem 0.64rem;
+  font-family: inherit;
+  font-size: 0.7rem;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.32);
 }
 
 .bigger-picture-card {
   position: relative;
   overflow: hidden;
-  padding: 34px 26px 36px;
+  padding: 38px 17px 36px;
   border-radius: 28px;
   background:
     radial-gradient(circle at 50% 0%, rgba(132, 91, 220, 0.16), transparent 46%),
@@ -355,11 +408,247 @@ onBeforeUnmount(() => {
   -webkit-backdrop-filter: blur(10px);
 }
 
+.bigger-picture-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 12px;
+  max-width: 100%;
+}
+
+.bigger-picture-chip {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.34rem 0.68rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.045);
+  font-family: "Afacad", "Manrope", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  font-size: 0.78rem;
+  line-height: 1;
+  color: rgba(223, 215, 238, 0.54);
+}
+
+.bigger-picture-kicker {
+  margin-top: 18px;
+  font-family: "Afacad", "Manrope", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  font-size: 0.82rem;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+  color: rgba(235, 228, 248, 0.74);
+}
+
+.bigger-picture-lead {
+  max-width: 100%;
+  margin-top: 12px;
+  font-family: "Lora", Georgia, "Times New Roman", serif;
+  font-size: 0.9rem;
+  line-height: 1.56;
+  color: rgba(232, 224, 244, 0.82);
+}
+
+.bigger-picture-supporting {
+  max-width: 100%;
+  margin-top: 14px;
+  font-family: "Afacad", "Manrope", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  font-size: 0.9rem;
+  line-height: 1.56;
+  color: rgba(214, 210, 223, 0.5);
+}
+
 @supports not ((backdrop-filter: blur(10px)) or (-webkit-backdrop-filter: blur(10px))) {
   .bigger-picture-card {
     background:
       radial-gradient(circle at 50% 0%, rgba(132, 91, 220, 0.18), transparent 46%),
       rgba(42, 37, 51, 0.96);
+  }
+}
+
+.gentle-guidance-card {
+  position: relative;
+  overflow: hidden;
+  padding: 30px 24px 28px;
+  border-radius: 30px;
+  border: 1px solid rgba(214, 198, 255, 0.08);
+  background:
+    radial-gradient(circle at 17% 84%, rgba(88, 39, 161, 0.22), transparent 26%),
+    radial-gradient(circle at 84% 86%, rgba(103, 160, 255, 0.22), transparent 24%),
+    linear-gradient(128deg, rgba(14, 13, 21, 0.985) 0%, rgba(19, 17, 28, 0.98) 22%, rgba(32, 22, 50, 0.96) 50%, rgba(57, 38, 97, 0.9) 76%, rgba(57, 97, 168, 0.82) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.035),
+    0 18px 44px rgba(8, 7, 16, 0.24);
+}
+
+.gentle-guidance-card::before {
+  content: "";
+  position: absolute;
+  inset: -18% -10%;
+  background:
+    radial-gradient(circle at 56% 46%, rgba(255, 255, 255, 0.08), transparent 18%),
+    linear-gradient(125deg, transparent 22%, rgba(166, 206, 255, 0.16) 46%, rgba(208, 138, 255, 0.14) 61%, transparent 79%);
+  opacity: 0.92;
+  filter: blur(32px);
+  pointer-events: none;
+}
+
+.gentle-guidance-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 50%, transparent 48%, rgba(8, 8, 14, 0.18) 100%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.012), rgba(255, 255, 255, 0));
+  pointer-events: none;
+}
+
+.gentle-guidance-label {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  font-size: 10px;
+  line-height: 1.2;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgba(228, 216, 255, 0.76);
+}
+
+.gentle-guidance-copy {
+  position: relative;
+  z-index: 1;
+  max-width: 494px;
+  margin: 20px auto 0;
+  font-family: "Lora", Georgia, "Times New Roman", serif;
+  font-size: 0.92rem;
+  font-weight: 400;
+  font-style: normal;
+  line-height: 1.78;
+  letter-spacing: 0.002em;
+  text-align: center;
+  color: rgba(245, 241, 250, 0.9);
+  text-wrap: pretty;
+}
+
+@media (min-width: 768px) {
+  .bigger-picture-card {
+    padding: 42px 20px 40px;
+  }
+
+  .bigger-picture-chip-row {
+    margin-top: 14px;
+    gap: 0.5rem;
+  }
+
+  .bigger-picture-chip {
+    font-size: 0.82rem;
+    padding: 0.38rem 0.74rem;
+  }
+
+  .bigger-picture-kicker {
+    margin-top: 20px;
+    font-size: 0.86rem;
+  }
+
+  .bigger-picture-lead {
+    max-width: 500px;
+    margin-top: 14px;
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+
+  .bigger-picture-supporting {
+    max-width: 448px;
+    margin-top: 16px;
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+
+  .gentle-guidance-card {
+    padding: 34px 34px 32px;
+    border-radius: 32px;
+  }
+
+  .gentle-guidance-copy {
+    max-width: 556px;
+    margin-top: 20px;
+    font-size: 1.04rem;
+    line-height: 1.82;
+  }
+}
+
+.reading-home-cta {
+  position: relative;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  overflow: hidden;
+  border-radius: 999px;
+  border: 1px solid rgba(192, 170, 255, 0.12);
+  background:
+    radial-gradient(circle at 18% 50%, rgba(94, 54, 180, 0.18), transparent 30%),
+    radial-gradient(circle at 82% 50%, rgba(95, 132, 255, 0.16), transparent 28%),
+    linear-gradient(135deg, rgba(26, 23, 35, 0.98) 0%, rgba(45, 31, 72, 0.96) 52%, rgba(40, 58, 102, 0.94) 100%);
+  padding: 0.95rem 1.1rem;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.045),
+    0 14px 34px rgba(7, 6, 14, 0.22);
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    background 180ms ease;
+}
+
+.reading-home-cta:hover {
+  border-color: rgba(206, 188, 255, 0.18);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.055),
+    0 18px 40px rgba(7, 6, 14, 0.26);
+}
+
+.reading-home-cta:active {
+  transform: scale(0.992);
+}
+
+.reading-home-cta-label {
+  font-family: "Afacad", "Manrope", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  color: rgba(248, 244, 255, 0.94);
+}
+
+.reading-home-cta-arrow {
+  display: inline-flex;
+  height: 2.1rem;
+  width: 2.1rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  font-size: 1.15rem;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.88);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+@media (min-width: 768px) {
+  .reading-home-cta {
+    padding: 1rem 1.3rem;
+  }
+
+  .reading-home-cta-label {
+    font-size: 1.08rem;
+  }
+
+  .reading-home-cta-arrow {
+    height: 2.2rem;
+    width: 2.2rem;
+    font-size: 1.18rem;
   }
 }
 

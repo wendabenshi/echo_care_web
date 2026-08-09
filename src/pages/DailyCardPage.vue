@@ -12,8 +12,7 @@
       :slots="readingSlots"
       reading-label="Today's Companion"
       reading-title="Your companion message"
-      draw-again-label="Draw your daily card again"
-      @close="handleClose"
+      @home="goToHome"
     />
 
     <main class="relative z-[1] min-h-[100dvh] pt-16">
@@ -141,8 +140,8 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onBeforeUnmount, onMounted, ref } from "vue";
-import { RouterLink } from "vue-router";
+import { computed, onBeforeUnmount, onMounted, ref } from "vue";
+import { RouterLink, useRouter } from "vue-router";
 import DailyReadingPanel from "../components/draw/DailyReadingPanel.vue";
 import DrawToast from "../components/draw/DrawToast.vue";
 import QuestionBar from "../components/draw/QuestionBar.vue";
@@ -150,6 +149,7 @@ import StarfieldBackground from "../components/StarfieldBackground.vue";
 import TarotCardBack from "../components/draw/TarotCardBack.vue";
 import TarotCardFace from "../components/draw/TarotCardFace.vue";
 import {
+  createSingleCardDraw,
   resolveSlotCards,
   simulateSingleDraw,
   simulateSingleInterpret,
@@ -159,6 +159,7 @@ import { trackRingEvent } from "../utils/ringAnalytics.js";
 const DAILY_QUESTION = "What do I need to know today?";
 const PREVIEW_BACK_MS = 1500;
 const PREVIEW_FRONT_HOLD_MS = 1200;
+const router = useRouter();
 
 const question = ref(DAILY_QUESTION);
 const submitted = ref(false);
@@ -210,10 +211,11 @@ function selectChip(text) {
 }
 
 async function onSubmit(text) {
+  const normalizedQuestion = String(text ?? "").trim() || DAILY_QUESTION;
   submittedQuestion.value = text;
   submitted.value = true;
-  pickingEnabled.value = false;
-  draw.value = null;
+  pickingEnabled.value = true;
+  draw.value = createSingleCardDraw(normalizedQuestion);
   showReading.value = false;
   readingText.value = "";
   readingData.value = null;
@@ -221,15 +223,14 @@ async function onSubmit(text) {
   previewFlipped.value = false;
   previewLoading.value = false;
 
-  try {
-    draw.value = await simulateSingleDraw(text, { mode: "daily" });
-    schedule(() => {
-      pickingEnabled.value = true;
-    }, 500);
-  } catch {
-    showToast("The cards aren't speaking right now");
-    submitted.value = false;
-  }
+  simulateSingleDraw(normalizedQuestion, { mode: "daily" })
+    .then((nextDraw) => {
+      if (!submitted.value || submittedQuestion.value !== normalizedQuestion) return;
+      draw.value = nextDraw;
+    })
+    .catch(() => {
+      // Keep the locally created card so the daily ritual never blocks on spread metadata.
+    });
 }
 
 function maybeStartDailyFlow() {
@@ -278,11 +279,10 @@ async function openReading() {
   }
 }
 
-async function handleClose() {
+async function goToHome() {
   resetSession();
   autoStarted.value = false;
-  await nextTick();
-  maybeStartDailyFlow();
+  await router.push("/");
 }
 
 function resetSession() {

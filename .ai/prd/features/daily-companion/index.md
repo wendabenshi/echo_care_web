@@ -2,20 +2,21 @@
 title: "功能模块 PRD：每日陪伴"
 version: "1.0.0"
 feature_id: "daily-companion"
-last_updated: "2026-07-13"
+last_updated: "2026-08-07"
 owner: "Wenzerong / Codex"
 status: "草稿"
 ---
 
 ## 1. 目的
 
-每日陪伴让用户在触碰 NFC 戒指或进入每日抽牌流程后，获得一张每日卡牌和一段简短情绪陪伴。
+每日陪伴让用户在触碰 NFC 戒指或进入每日抽牌流程后，获得一张每日卡牌，并通过塔罗象征进入一段简短但具体的情绪反思与现实生活陪伴。
 
 ## 2. 目标
 
 - 让每日流程像温柔的日常仪式，而不是算命工具。
 - 保持结果页简短、易读、移动端优先。
 - 保留当前高级黑紫色视觉语言。
+- 让 Daily Reading 更像 Tarot Journal，而不是只给一句 AI 鸡汤。
 
 ## 3. 范围
 
@@ -45,14 +46,19 @@ status: "草稿"
 
 ## 5. UX 原则
 
-- 参考 Apple Journal / Calm 的阅读节奏。
+- 参考 Apple Journal / Calm 与 WooMoo 的阅读节奏。
 - 避免密集段落。
-- 避免不必要的图标、分割线、卡片容器。
-- 推荐结果页 Section：
-  - Today's Energy
-  - For Your Heart
-  - One Small Action
-  - Companion Note
+- 避免不必要的图标、分割线、按钮式摘要卡。
+- 结果页应强调 Tarot symbolism + self reflection + emotional companion。
+- 推荐结果页结构：
+  - Card Hero
+  - Core Insight
+  - Glance Row：`TODAY / YOUR HEART / GENTLE STEP`
+  - Reading Sections：
+    - `WHAT THIS CARD REFLECTS`
+    - `WHERE YOU MAY BE NOW`
+    - `ONE SMALL SHIFT`
+  - `A GENTLE REMINDER`
 
 ## 6. 技术考量
 
@@ -65,13 +71,24 @@ status: "草稿"
 ## 7. 数据 / 业务规则
 
 - 每日模式使用一张牌。
-- 每日解读不应该像预测。
-- 用户可见文案应简短、有情绪支持感。
-- 每日结果结构以 4 段为准：
-  - `todaysEnergy`
-  - `forYourHeart`
-  - `oneSmallAction`
-  - `companionNote`
+- 每日解读不应该像预测，而应借塔罗象征帮助用户理解情绪、现实情境和小幅调整方向。
+- 用户可见文案应简短、有情绪支持感，同时必须和现实生活场景有关联。
+- Daily Reading 的目标 JSON 结构为：
+  - `card_name`
+  - `core_insight`
+  - `sections.what_this_card_reflects`
+  - `sections.where_you_may_be_now`
+  - `sections.one_small_shift`
+  - `sections.gentle_reminder`
+- 服务端应对 Daily Reading 增加内容护栏：
+  - 若输出包含旧模板高频禁用词（如 `emotional pattern`、`nervous system`、`healing journey`、`inner journey`），则拒绝该结果并回退到新的 grounded fallback。
+  - `sections.where_you_may_be_now` 必须包含至少一个现实生活场景线索。
+  - `The Magician` 的结果必须明确提到 initiative / 现有技能或资源 / 真实情境中的行动。
+- Glance Row 不由 AI 自由生成，改为本地塔罗牌数据映射：
+  - `today`
+  - `heart`
+  - `step`
+- Daily Reading 内容长度目标应控制在约 180-220 词，避免写成心理疗愈文章。
 
 ## 8. 待解决问题
 

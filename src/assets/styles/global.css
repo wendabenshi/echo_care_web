@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Afacad:wght@400;500;600&family=Cormorant+Garamond:wght@400;500;600&family=Lora:wght@400;500;600&family=Manrope:wght@400;500;600&family=Red+Hat+Display:wght@500;600&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -46,5 +48,28 @@
 @layer utilities {
   .font-serif {
     font-family: Georgia, "Times New Roman", serif;
+  }
+
+  .font-editorial {
+    font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+  }
+
+  .font-reading {
+    font-family: "Manrope", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter",
+      "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  }
+
+  .font-woomoo-serif {
+    font-family: "Lora", Georgia, "Times New Roman", serif;
+  }
+
+  .font-woomoo-ui {
+    font-family: "Red Hat Display", "Manrope", -apple-system, BlinkMacSystemFont,
+      "SF Pro Text", "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  }
+
+  .font-woomoo-body {
+    font-family: "Afacad", "Manrope", -apple-system, BlinkMacSystemFont, "SF Pro Text",
+      "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   }
 }

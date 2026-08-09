@@ -6,7 +6,7 @@ status: "草稿"
 owner: "Codex"
 story_points: "TBD"
 created_date: "2026-07-13"
-last_updated: "2026-07-13"
+last_updated: "2026-08-09"
 related_prd_feature: "../index.md"
 ---
 
@@ -20,7 +20,7 @@ related_prd_feature: "../index.md"
 
 - [ ] AC 1：问题解牌 Hero 采用“问题 → 三张牌 → Three-Card Insight”的顺序，并先给核心答案。
 - [ ] AC 2：正文控制为 5 个 Section：Your Heart Today、What's Influencing This、Where To Focus、The Bigger Picture、A Gentle Reminder。
-- [ ] AC 3：Section 采用差异化容器策略；前三个单牌解释 Section 可使用轻量玻璃卡片承载，The Bigger Picture / A Gentle Reminder 保持去卡片化，避免整页所有模块都套同一种卡片。
+- [ ] AC 3：Section 采用差异化容器策略；前三个单牌解释 Section 使用轻量玻璃卡片，The Bigger Picture 使用总结主卡，A Gentle Reminder 使用独立氛围 guidance 卡，避免整页所有模块都套同一种卡片。
 - [ ] AC 4：不同 Section 的内容重量不同，避免所有模块都像同一个模板。
 - [ ] AC 5：The Bigger Picture 是页面高潮，负责把三张牌串成完整答案，并以高于单牌解释卡的“总结主卡”样式呈现。
 - [ ] AC 6：移动端正文不拥挤，Hero 后和 Section 之间保留充足留白。
@@ -44,14 +44,16 @@ related_prd_feature: "../index.md"
 - 抽牌组件：`src/components/draw/CardFan.vue`、`CardSlots.vue`
 - 样式 / 布局：
 - Hero 负责回答问题，不承载长正文。
-- 正文采用分层容器策略：前三个单牌解释 Section 可使用轻量玻璃卡片，后两段总结型 Section 以去卡片化排版形成节奏变化。
+- 正文采用分层容器策略：前三个单牌解释 Section 使用轻量玻璃卡片，The Bigger Picture 使用总结主卡，A Gentle Reminder 使用独立的氛围 guidance 卡形成收尾。
 - The Bigger Picture 视觉权重高于普通 Section，可采用更厚内边距、更高圆角、弱紫色径向光感、轻描边和模糊背景形成“总结主卡”。
+- A Gentle Reminder 允许使用一张独立渐变卡收尾，文案居中、偏斜体、情绪感强，但不能和前三张牌解释卡使用同一种容器语言。
 
 ### 4.2. API / Serverless
 
 - 端点：`api/reading.js`
 - 请求 / 响应结构：保持 question reading JSON 稳定。
 - 错误处理：保留兜底解读，并确保兜底也遵循相同结构。
+- 临时调试策略：在问题解牌页 UI 优化阶段，Question Reading 固定走 fallback，不请求 Gemini；即使旧前端请求未显式传 `mode`，服务端也应识别三张牌问题解牌并套用同一策略。
 
 ### 4.3. Supabase / 数据
 
@@ -106,7 +108,7 @@ related_prd_feature: "../index.md"
 ## 6. 风险与依赖
 
 - 风险：如果 Three-Card Insight 过长，Hero 会再次变成正文。
-- 风险：如果所有 Section 都使用同一种卡片模板，页面会显得吵且疲劳。
+- 风险：如果所有 Section 都使用同一种卡片模板，页面会显得吵且疲劳；Reminder 即使卡片化，也必须与前三张牌解释卡和 Bigger Picture 拉开差异。
 - 依赖：Gemini 输出质量、当前三张牌视觉资产、移动端真实截图反馈。
 
 ## 7. 开发笔记与日志
@@ -128,6 +130,35 @@ related_prd_feature: "../index.md"
 - 2026-07-16 00:00 - Codex：继续收敛问题抽牌页入场闪烁。此前虽然已简化动画参数，但 `submitted` 一旦切为 `true`，空牌框和下方牌组仍会先挂载到 DOM，再等待抽牌数据与后续帧稳定，仍可能露出一拍空白。现新增 `slotsVisible` / `fanVisible`，改为等待 `simulateDraw()` 返回后，再分帧显示空牌框与牌组，减少空白组件先露出的闪烁感。
 - 2026-07-16 00:00 - Codex：根据用户继续反馈，确认上一版分帧显示虽然减少了空白挂载，但会拖慢整体节奏，且没有解决下方牌组上浮时的真实闪烁。现改为仅以 `drawReady` 控制显示，不再额外分帧延后；同时移除 `TarotCardBack.vue` 中每张牌背的 `drop-shadow` 滤镜、将牌背图片改为 eager 加载，并去掉 `CardFan.vue` 中所有牌实例的动态 `filter` / `filter transition`，优先降低大牌组上浮时的合成压力。
 - 2026-07-16 00:00 - Codex：根据用户反馈“发送问题后页面在牌框和牌组出现前空白太久”，调整问题抽牌页首屏策略：`LoveEnergyPage.vue` 在提交问题后立即用本地同步生成的三张牌渲染牌框和下方牌组，不再等待 `/api/spread` 返回；待 Gemini spread 元数据返回后，只补充更新 `spread_name` 和 `position_meanings`，避免首屏因接口等待而显得空。
+- 2026-08-09 00:00 - Codex：为支持问题解牌页纯 UI / 布局调试，临时将 Question Reading 服务端逻辑固定为 fallback-only，并兼容旧请求未传 `mode` 的情况，避免 Gemini 配额、延迟和输出波动干扰样式验收。
+- 2026-08-09 00:00 - Codex：继续将问题解牌页前三个 section 向 WooMoo 的内容卡风格靠拢：取消显眼的紫色副标题，改为使用 `position_tags` 胶囊标签；将牌名收小并改为更平的标题层；同步压低卡片背景、描边、阴影和内边距，让阅读块更像安静的内容容器而不是厚重玻璃卡。
+- 2026-08-09 00:00 - Codex：继续把问题解牌页前三个 section 往 WooMoo 收紧：缩小移动端外层左右留白，让卡片更贴边；将标签胶囊继续做淡做小；将正文亮度再压低一档，减少内容块整体发亮感。
+- 2026-08-09 00:00 - Codex：继续细收问题解牌页前三个 section 的容器比例：进一步减小移动端圆角和内边距，并压低 section label 的字号与字距，让卡片更接近 WooMoo 那种紧凑而克制的内容块节奏。
+- 2026-08-09 00:00 - Codex：根据最新反馈继续压缩问题解牌页卡片内部文字内容的竖直间距，收紧标题、标签和正文段落之间的留白，让 section 内部节奏更接近 WooMoo。
+- 2026-08-09 00:00 - Codex：继续把问题解牌页前三个卡片内标题颜色从偏亮白色压到更柔和的灰白层级，让标题观感更接近 WooMoo，而不再像独立高亮展示标题。
+- 2026-08-09 00:00 - Codex：继续将问题解牌页前三个卡片内标题颜色从灰白进一步校正为低饱和淡紫灰，贴近 WooMoo 标题层级，不改卡片结构与间距。
+- 2026-08-09 00:00 - Codex：根据最新澄清修正颜色映射错误；WooMoo 式淡紫只保留给 section label，前三个卡片中的牌名颜色改回柔和白，避免把 label 的层级误套到牌名上。
+- 2026-08-09 00:00 - Codex：继续按 WooMoo 的第一屏节奏重排问题解牌页 Hero：弱化问题本身的标题权重、在三张牌下补入位置标签、将 `Your Three-Card Insight` 升级为正式标题并把摘要降为正文层，同时压缩三牌区域整体高度，让第一屏更像完整回答封面而不是“问题 + 卡牌列表 + 正文开头”。
+- 2026-08-09 00:00 - Codex：继续处理问题解牌页第一屏拥挤感，为 Hero 区三张牌下方单独增加短标签映射与单行显示规则，避免过长位置文案换行占高，并同步下调牌名与 Insight 层级、放宽 Insight 正文宽度。
+- 2026-08-09 00:00 - Codex：继续压低问题解牌页第一屏密度：将三张牌再缩小一档、进一步淡化 Insight 正文，并把首个正文 section 往下推，让 Hero 保持更完整的封面感。
+- 2026-08-09 00:00 - Codex：根据最新反馈继续修正问题解牌页第一屏与首卡衔接：将 `YOUR QUESTION` 调成淡紫层级、增加 Insight 与首卡的垂直间距、将卡片内首句单独提为淡紫色摘要，并修复卡片正文在只有单句时重复渲染两遍的问题。
+- 2026-08-09 00:00 - Codex：继续微调问题解牌页卡片正文的上下留白，收紧首句摘要与正文之间、正文段落之间的垂直间距，让卡片内部节奏更紧凑。
+- 2026-08-09 00:00 - Codex：根据用户进一步澄清修正颜色映射：淡紫只保留给 `YOUR QUESTION` 和三个卡片的小节标题层级，卡片内首句摘要恢复为普通正文色，避免误把正文首句当成标签层处理。
+- 2026-08-09 00:00 - Codex：继续修正问题解牌页视觉层级：将三个卡片的小节标题颜色改为更明确的淡紫值，避免旧色阶在真机上不明显；同时将 Insight 正文到首张卡片的垂直距离收回到更接近卡片间距 1.5 倍的节奏。
+- 2026-08-09 00:00 - Codex：根据最新参考图继续压缩问题解牌卡片正文节奏，将正文块上边距、段落间距与行高进一步收紧，向 WooMoo 卡片正文的紧凑阅读感靠拢。
+- 2026-08-09 00:00 - Codex：继续将问题解牌卡片正文颜色压灰一档，降低正文对比度，使其更接近 WooMoo 那种克制的灰白正文层级。
+- 2026-08-09 00:00 - Codex：根据真机反馈继续加大问题解牌卡片正文降灰力度，将卡片首句摘要与后续正文都改为更明确的灰白层级，避免只调整次段导致视觉变化不明显。
+- 2026-08-09 00:00 - Codex：根据用户最新要求继续压缩问题解牌卡片正文间距，将首句摘要到正文、正文段落之间的留白进一步收缩到上一版约 0.75 倍。
+- 2026-08-09 00:00 - Codex：根据最新反馈移除问题解牌卡片中的独立摘要层，将首句并回胶囊下方正文连续展示；同时继续将正文段落间距和行高压到上一版约 0.7 倍，形成更接近 WooMoo 的紧凑正文块。
+- 2026-08-09 00:00 - Codex：根据用户提供的 WooMoo 收尾参考图，将问题解牌页最后一屏 `A Gentle Reminder` 从普通去卡片化文本升级为独立 guidance 渐变卡；合并收尾文案为一段居中斜体正文，并通过紫蓝氛围光和更高圆角形成明显的“最后一屏收尾卡”。
+- 2026-08-09 00:00 - Codex：继续根据用户对比图优化 `A Gentle Reminder` 的可读性与质感：将卡片整体底色压暗、减弱边框存在感、把光感收束为一条更集中的紫蓝雾带，并将正文从高反差 `Cormorant Garamond` 斜体切换为更稳定易读的 `Lora` 斜体，降低“美但飘”的问题。
+- 2026-08-09 00:00 - Codex：根据用户最新真机反馈，继续下调 `A Gentle Reminder` 正文字号并取消斜体，改为更克制的常规 serif 阅读样式，优先解决“字体太大、倾斜太重影响阅读”的问题。
+- 2026-08-09 00:00 - Codex：根据用户最新要求，移除问题解牌页底部 CTA 下方的 AI 声明文案，并将 CTA 从“追问 AI”改为固定返回首页按钮，按钮文字更新为 `Back to Home`，点击后直接跳转 `/`。
+- 2026-08-09 00:00 - Codex：根据用户对底部按钮“太丑”的反馈，继续将 CTA 从高亮电商式紫色大按钮收敛为更贴近页面氛围的深色导航按钮：降低饱和度和发光感、缩小高度、弱化大面积渐变，并把箭头收进独立的低对比圆形辅助元素。
+- 2026-08-09 00:00 - Codex：根据用户对 `THE BIGGER PICTURE` 角色的进一步澄清，将总结主卡从“固定标题 + 整段正文”改成更明确的总结结构：保留 section label，移除重复的 `Putting It All Together` 占位标题，改为一层 lead 结论 + 一层 supporting copy，并同步收窄文本宽度、放大内边距，让它更像三张牌的收束结论而不是第四张普通说明卡。
+- 2026-08-09 00:00 - Codex：根据用户对最新真机效果“很突兀、单薄、还没有上面三张卡重要”的反馈，继续为 `THE BIGGER PICTURE` 增加结构厚度：在主结论上方加入三张牌名的弱胶囊行和一个小 kicker，收小 lead 字号、压低 supporting copy 层级，并进一步放大总结卡内边距，让它在不靠大字的前提下更像真正的整组总结主卡。
+- 2026-08-09 00:00 - Codex：根据最新真机反馈，继续下调 `THE BIGGER PICTURE` 的正文级字号与行高，将 lead / supporting copy 收到与前三张解释卡正文更接近的阅读层级，保留总结主卡身份但不再靠更大的字体撑视觉。
+- 2026-08-09 00:00 - Codex：根据最新真机反馈继续修正 `THE BIGGER PICTURE` 的横向节奏，将总结卡左右内边距收回到与前三张卡正文区一致，并移除正文内部额外收窄，让右侧边距不再明显大于上方卡片。
 
 ## 8. AI 交互日志
 
@@ -157,6 +188,64 @@ related_prd_feature: "../index.md"
 - Codex：更新 `QR001` 验收标准与实现说明，明确“前三个单牌解释 section 使用轻量卡片，后两个总结 section 去卡片化”的规则。
 - 用户：提供 Bigger Picture 推荐样式，要求做成更高权重的总结主卡。
 - Codex：将 `LoveReadingPanel.vue` 的 The Bigger Picture 升级为独立总结主卡，并同步 `QR001` 对该 section 的视觉要求。
+- 用户：当前需要调试问题解牌页样式，希望问题解牌页临时走 fallback。
+- Codex：将 `api/reading.js` 的问题解牌分支临时切到 fallback-only，并同步 `question-reading` PRD 与 `QR001` 用户故事，确保旧请求不传 `mode` 时也能稳定命中 fallback。
+- 用户：提供当前问题解牌页与 WooMoo 的 section 对比图，希望前三个 section 更贴近 WooMoo 的内容块风格。
+- Codex：在 `LoveReadingPanel.vue` 中把紫色副标题收回正文，并利用已有 `position_tags` 渲染小标签胶囊，同时收平标题和卡片容器层级，让 section 视觉更接近 WooMoo。
+- 用户：确认继续往 WooMoo 靠，希望进一步收窄外边距、收淡标签并压低正文灰度。
+- Codex：继续调窄 `LoveReadingPanel.vue` 的移动端横向留白，扩大 section 卡片占宽，并同步收轻标签与正文层级。
+- 用户：继续确认往 WooMoo 靠，希望把卡片圆角、内边距和 section label 再收一点。
+- Codex：继续缩小 `LoveReadingPanel.vue` 中前三个 section 的圆角和 padding，并收紧 label 字距与大小。
+- 用户：要求把卡片内文字内容的竖直间距继续调小。
+- Codex：继续收紧 `LoveReadingPanel.vue` 中标题、标签和正文之间的垂直留白，只调整卡片内部节奏，不改内容结构。
+- 用户：要求卡片内标题颜色也需要继续对齐 WooMoo。
+- Codex：将 `LoveReadingPanel.vue` 中前三个卡片标题颜色从高亮白调整为更柔和的灰白层级。
+- 用户：进一步指出 WooMoo 卡片标题更像淡紫色，希望继续对齐。
+- Codex：将 `LoveReadingPanel.vue` 中前三个卡片标题颜色从灰白进一步调成低饱和淡紫灰。
+- 用户：指出当前被改成淡紫的是牌名，而不是上方 section label，希望修正。
+- Codex：将 `LoveReadingPanel.vue` 中前三个卡片牌名颜色恢复为柔和白，只保留 section label 使用淡紫层级。
+- 用户：提供当前问题解牌页第一屏与 WooMoo 第一屏对比，希望知道如何改得更接近。
+- Codex：在 `LoveReadingPanel.vue` 中重排第一屏层级，弱化问题、补入卡牌位置标签、提升 `Your Three-Card Insight` 为正式标题，并压缩三张牌区域高度。
+- 用户：指出当前第一屏仍然显得拥挤，希望继续收小文字并减少密度。
+- Codex：在 `LoveEnergyPage.vue` / `LoveReadingPanel.vue` 中为 Hero 区三张牌下方引入短标签映射，确保首屏标签尽量单行显示，并同步收小牌名与 Insight 层级。
+- 用户：要求先继续优化第一屏，再部署。
+- Codex：继续在 `LoveReadingPanel.vue` 中收小三张牌、推迟首个正文 section 进入首屏，并降低 Insight 正文存在感，然后再验证与部署。
+- 用户：指出当前顶端 label 颜色、Insight 到首卡间距、卡片内首句颜色和正文重复显示仍有问题。
+- Codex：在 `LoveReadingPanel.vue` 中分别调整顶端 label 颜色、增大 Hero 到首卡间距、将卡片首句改为淡紫独立摘要，并修复 `headline` 在单句情况下被重复灌回正文的问题。
+- 用户：要求卡片正文上下间距进一步微调减小。
+- Codex：继续收紧 `LoveReadingPanel.vue` 中卡片首句与正文、正文段落与段落之间的垂直留白。
+- 用户：指出线上看起来像“没变化”，实际是卡片正文首句仍保留了淡紫色，希望恢复。
+- Codex：将 `LoveReadingPanel.vue` 中卡片首句摘要从淡紫恢复为普通正文色，并重新部署。
+- 用户：指出三个卡片的小节标题淡紫色仍不明显，且 insight 正文到第一张卡片距离仍过大。
+- Codex：将 `LoveReadingPanel.vue` 中三个卡片的小节标题改为更明确的淡紫色值，并显著缩短 Insight 正文到首张卡片的距离。
+- 用户：要求问题解牌卡片内正文间距继续缩小，参考 WooMoo 的正文节奏。
+- Codex：继续收紧 `LoveReadingPanel.vue` 中卡片正文的顶部间距、段落间距和行高，只调整正文阅读密度。
+- 用户：要求正文颜色稍微再调灰一点。
+- Codex：将 `LoveReadingPanel.vue` 中问题解牌卡片正文颜色从当前灰白继续压低一档，不改字号与间距。
+- 用户：反馈线上看起来几乎没变化，说明之前降灰幅度太小。
+- Codex：继续把 `LoveReadingPanel.vue` 中卡片首句摘要和后续正文同时降灰，确保真机上能明显看出对比度降低。
+- 用户：确认颜色已达到预期，但要求把卡片正文间距进一步收缩到当前的约 0.75 倍。
+- Codex：继续将 `LoveReadingPanel.vue` 中卡片正文相关留白压缩到上一版约 0.75 倍，不再改颜色。
+- 用户：指出摘要仍然单独显示，希望直接并入正文，且正文行距继续缩小到当前约 0.7 倍。
+- Codex：将 `LoveReadingPanel.vue` 中卡片摘要层移除，改为胶囊下方直接显示整段正文，并继续显著压缩正文行高与段落间距。
+- 用户：提供 WooMoo 每日解牌页最后一屏参考图，希望 1:1 借鉴其 `Today’s Guidance` 卡片样式，用于问题解牌页最后一屏的 `A Gentle Reminder`。
+- Codex：将 `LoveReadingPanel.vue` 中的 `A Gentle Reminder` 改为独立 guidance 渐变卡，合并收尾文案为单段居中斜体正文，并同步修正文档中“Reminder 去卡片化”的旧规则。
+- 用户：进一步指出对比 WooMoo 后，自己的 reminder 卡在背景颜色和字体样式上仍然不够美观、可读性也偏弱。
+- Codex：继续调整 `LoveReadingPanel.vue` 中的 reminder 卡，将背景改为更深的黑紫底并收束中间光带，同时把正文改成更克制的 `Lora` 斜体，优先提升手机端阅读稳定性。
+- 用户：指出 reminder 卡正文仍然字体过大、倾斜过重，严重影响阅读。
+- Codex：继续收小 `LoveReadingPanel.vue` 中 reminder 卡正文，并取消斜体，改为更稳定的常规 serif 排版。
+- 用户：要求移除页面最下方的 AI 声明，并将底部按钮改成跳转首页的 `Back to Home`。
+- Codex：将 `LoveReadingPanel.vue` 底部 CTA 改为固定 `Back to Home`，删除下方 AI 声明；同时在 `LoveEnergyPage.vue` 中将按钮事件改为重置状态后跳转首页 `/`。
+- 用户：指出新的 `Back to Home` 按钮太丑，希望优化。
+- Codex：将 `LoveReadingPanel.vue` 底部 CTA 改为更低饱和的深色氛围导航按钮，取消强电商感的亮紫整块渐变，并增加更克制的圆形箭头辅助元素。
+- 用户：指出 `THE BIGGER PICTURE` 是上面三张牌的总结，希望结合当前页面整体布局进一步优化。
+- Codex：将 `LoveReadingPanel.vue` 中 `THE BIGGER PICTURE` 改成 lead + supporting copy 的总结主卡结构，去掉重复的固定标题，并通过更窄的文字列宽与更宽松的卡片内边距强化“总结收束”角色。
+- 用户：反馈新版本的 `THE BIGGER PICTURE` 仍然突兀、单薄，整体甚至没有上面三张解释卡重要。
+- Codex：继续调整 `LoveReadingPanel.vue` 中 `THE BIGGER PICTURE`，在总结正文前增加三张牌名的弱胶囊行与小 kicker，压小 lead 字号并补强卡片结构层级，让它更像三张牌的总括结论而不是单独一段大字正文。
+- 用户：指出问题解牌页 `THE BIGGER PICTURE` 的正文字体仍然比上面三张卡正文大，希望调成一致。
+- Codex：继续压低 `LoveReadingPanel.vue` 中 `THE BIGGER PICTURE` 的 lead / supporting copy 正文字号与行高，把总结卡阅读感收回到与前三张卡正文同一层级。
+- 用户：指出 `THE BIGGER PICTURE` 的正文右边距仍明显大于上面三张卡，希望和上方卡片正文右边距一致。
+- Codex：将 `LoveReadingPanel.vue` 中 `THE BIGGER PICTURE` 的卡片左右 padding 收回到与前三张卡相同的正文节奏，并取消正文内部额外的 `max-width` 收窄。
 - 用户：反馈问题抽牌页发送问题后，空白牌框会先出现 1 号框再闪出 2、3 号框，下方选牌组件上浮时中间也会闪一下。
 - Codex：定位到 `CardSlots.vue` 的逐个延迟入场和 `LoveEnergyPage.vue` 中牌组入场的 opacity/transform/scale 混合动画，改为牌框整组同步出现，并收束牌组入场动画以减少中途闪烁。
 - 用户：继续反馈下方选牌组件入场仍会闪烁，并且会闪出空白牌框。

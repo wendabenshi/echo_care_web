@@ -11,6 +11,142 @@ function normalizeWhitespace(value) {
   return String(value ?? "").replace(/\s+/g, " ").trim();
 }
 
+const DAILY_BANNED_PHRASES = [
+  "emotional pattern",
+  "nervous system",
+  "healing journey",
+  "inner journey",
+  "healing process",
+  "transformation",
+  "alignment",
+  "the universe",
+  "destiny",
+];
+
+const DAILY_REAL_LIFE_HINTS = [
+  "work",
+  "career",
+  "job",
+  "project",
+  "meeting",
+  "decision",
+  "conversation",
+  "message",
+  "text",
+  "relationship",
+  "family",
+  "friend",
+  "friends",
+  "home",
+  "team",
+  "meal",
+  "partner",
+  "loved one",
+  "loved ones",
+  "habit",
+  "routine",
+  "goal",
+  "reply",
+  "start",
+  "begin",
+];
+
+const MAGICIAN_REQUIRED_HINTS = [
+  "initiative",
+  "resourceful",
+  "resourcefulness",
+  "skill",
+  "skills",
+  "resource",
+  "resources",
+  "tool",
+  "tools",
+  "available",
+  "existing",
+  "start",
+  "begin",
+  "action",
+  "draft",
+  "project",
+  "message",
+  "work",
+];
+
+const DAILY_FALLBACK_ARCHETYPES = {
+  initiative: {
+    coreTemplate:
+      "{card} points to a day when momentum matters. Something moves once you stop waiting for a better moment.",
+    reflectsTemplate:
+      "{card} is about initiative, direction, and making use of what is already in front of you. In daily life, it often appears when a conversation, personal plan, or unfinished idea is ready to move from thinking into action.",
+    scenarioTemplate:
+      "This may show up in a message you keep drafting, a decision in your personal life that has stayed unresolved, or a step you already know how to take but keep postponing. The card fits moments when the real shift is not more preparation, but starting with what you already have.",
+    shiftTemplate:
+      "Take the first practical step today. Send the draft, say the thing, make the call, or begin the part you can do now before your doubts get another full day.",
+    reminderTemplate:
+      "Progress may not need a breakthrough today. It may only need your first clear move.",
+  },
+  connection: {
+    coreTemplate:
+      "{card} points to a day when connection, warmth, or shared feeling matters more than staying guarded.",
+    reflectsTemplate:
+      "{card} reflects closeness, emotional openness, and the part of daily life that feels better when it is shared honestly. Today it often points to relationships, affection, support, or the kind of home feeling you want to protect.",
+    scenarioTemplate:
+      "This may show up in a relationship conversation, time with family, a friend you have been meaning to answer, or the question of whether a connection truly feels mutual. The card fits moments when harmony depends on participation, not silent hoping.",
+    shiftTemplate:
+      "Do one small thing that supports connection today. Reply with care, say what you appreciate, check in first, or make space for a conversation you actually want to have.",
+    reminderTemplate:
+      "Closeness usually grows through small, honest gestures, not perfect timing.",
+  },
+  pause: {
+    coreTemplate:
+      "{card} points to a day when slowing down gives you better information than forcing an answer.",
+    reflectsTemplate:
+      "{card} reflects pause, observation, and the need to notice what is happening beneath the obvious surface. In daily life, it matters when you are tempted to rush a decision before your thoughts, feelings, or timing are actually settled.",
+    scenarioTemplate:
+      "This may show up in a conversation you are not ready to have, a personal decision that still feels unclear, or a habit of answering too fast just to stop the discomfort. The card fits moments when waiting briefly is wiser than reacting quickly.",
+    shiftTemplate:
+      "Give one unresolved situation a little more space today. Write your real thoughts down, wait before replying, or ask one clarifying question before choosing your next move.",
+    reminderTemplate:
+      "A slower answer can still be a strong answer.",
+  },
+  truth: {
+    coreTemplate:
+      "{card} points to a day when honesty and steadiness matter more than keeping everything comfortable.",
+    reflectsTemplate:
+      "{card} reflects clear standards, self-respect, and the willingness to deal with what is actually true. In daily life, it often appears when structure, boundaries, or direct communication matter more than keeping the peace.",
+    scenarioTemplate:
+      "This may show up in naming a boundary, making a fair decision, clarifying what you can realistically give, or finally saying what you can and cannot carry. The card fits moments when being clear is kinder than staying vague.",
+    shiftTemplate:
+      "Choose one place to be more direct today. Set the expectation, give the honest answer, or simplify the decision so you are no longer negotiating against yourself.",
+    reminderTemplate:
+      "Clarity can be caring, especially when it keeps you from abandoning yourself.",
+  },
+  change: {
+    coreTemplate:
+      "{card} points to a day when something is shifting, ending, or asking to be faced more directly.",
+    reflectsTemplate:
+      "{card} reflects disruption, release, or the moment when an old way stops holding together. In daily life, it matters when you can already feel that a pattern, expectation, or attachment is no longer carrying you where you need to go.",
+    scenarioTemplate:
+      "This may show up in a dynamic that keeps repeating, a relationship pattern that has run its course, or a truth you can no longer smooth over. The card fits moments when discomfort is part of making room for something more honest.",
+    shiftTemplate:
+      "Name what is no longer working today. Stop feeding the loop, change one part of the routine, or let one outdated expectation lose its hold on the rest of your day.",
+    reminderTemplate:
+      "Not every disruption is a setback. Some are the moment things stop pretending.",
+  },
+  gentle: {
+    coreTemplate:
+      "{card} points to a day when steadier care will take you further than pressure.",
+    reflectsTemplate:
+      "{card} reflects the value of patience, softness, and responding with more care than force. In daily life, it often matters when you are trying to hold something together without exhausting yourself in the process.",
+    scenarioTemplate:
+      "This may show up in the way you speak to yourself, how you handle a tense exchange, or how you approach something in daily life that has started to feel heavier than it should. The card fits moments that improve when you stop pushing so hard.",
+    shiftTemplate:
+      "Choose the gentler version of the next step today. Lower the pressure, shorten the task, soften your tone, or do the sustainable thing instead of the dramatic one.",
+    reminderTemplate:
+      "Softness is not the opposite of progress.",
+  },
+};
+
 function splitSentences(value) {
   return normalizeWhitespace(value).match(/[^.!?]+[.!?]?/g) ?? [];
 }
@@ -31,31 +167,177 @@ function shortenForDaily(value, maxSentences = 2, maxChars = 210) {
   return result;
 }
 
+function shortenToWordLimit(value, maxWords, maxChars = 999) {
+  const normalized = normalizeWhitespace(value);
+  if (!normalized) return "";
+
+  const words = normalized.split(/\s+/).filter(Boolean).slice(0, maxWords);
+  let result = words.join(" ").trim();
+
+  if (result.length > maxChars) {
+    result = result.slice(0, maxChars).trim();
+  }
+
+  return result.replace(/[,:;.\-–—\s]+$/g, "").trim();
+}
+
 function shapeDailyReading(reading) {
-  const todaysEnergy = shortenForDaily(reading.todaysEnergy || reading.guidance, 2, 190);
-  const forYourHeart = shortenForDaily(reading.forYourHeart || reading.needToday || reading.love, 2, 180);
-  const oneSmallAction = shortenForDaily(reading.oneSmallAction || reading.smallAction, 2, 170);
-  const companionNote = shortenForDaily(reading.companionNote, 2, 180);
+  const sections = reading.sections ?? {};
+  const cardName = normalizeWhitespace(
+    reading.card_name ||
+      reading.cardName ||
+      reading.card ||
+      reading.cardReadings?.[0]?.card,
+  );
+  const coreInsight = shortenToWordLimit(
+    reading.core_insight || reading.coreInsight || reading.forYourHeart || reading.todaysEnergy,
+    20,
+    150,
+  );
+  const whatThisCardReflects = shortenToWordLimit(
+    sections.what_this_card_reflects || reading.what_this_card_reflects || reading.todaysEnergy || reading.guidance,
+    50,
+    360,
+  );
+  const whereYouMayBeNow = shortenToWordLimit(
+    sections.where_you_may_be_now || reading.where_you_may_be_now || reading.forYourHeart || reading.needToday || reading.love,
+    70,
+    480,
+  );
+  const oneSmallShift = shortenToWordLimit(
+    sections.one_small_shift || reading.one_small_shift || reading.oneSmallAction || reading.smallAction,
+    45,
+    320,
+  );
+  const gentleReminder = shortenToWordLimit(
+    sections.gentle_reminder || reading.gentle_reminder || reading.companionNote,
+    25,
+    180,
+  );
 
   return {
     kind: "daily",
-    cardReadings: Array.isArray(reading.cardReadings)
-      ? reading.cardReadings.slice(0, 1).map((item, index) => ({
-          position: normalizeWhitespace(item?.position || `Card ${index + 1}`),
-          card: normalizeWhitespace(item?.card || `Card ${index + 1}`),
-          message: shortenForDaily(item?.message, 2, 220),
-        }))
-      : [],
-    todaysEnergy,
-    forYourHeart,
-    oneSmallAction,
-    companionNote,
-    guidance: todaysEnergy,
-    love: forYourHeart,
-    needToday: forYourHeart,
-    smallAction: oneSmallAction,
+    card_name: cardName,
+    core_insight: coreInsight,
+    sections: {
+      what_this_card_reflects: whatThisCardReflects,
+      where_you_may_be_now: whereYouMayBeNow,
+      one_small_shift: oneSmallShift,
+      gentle_reminder: gentleReminder,
+    },
     provider: reading.provider || "fallback",
   };
+}
+
+function containsAnyHint(text, hints) {
+  const normalized = normalizeWhitespace(text).toLowerCase();
+  return hints.some((hint) => normalized.includes(hint));
+}
+
+function validateDailyReadingCandidate(candidate, payload) {
+  const shaped = shapeDailyReading(candidate);
+  const allText = [
+    shaped.card_name,
+    shaped.core_insight,
+    shaped.sections.what_this_card_reflects,
+    shaped.sections.where_you_may_be_now,
+    shaped.sections.one_small_shift,
+    shaped.sections.gentle_reminder,
+  ]
+    .map((item) => normalizeWhitespace(item).toLowerCase())
+    .join(" ");
+
+  if (DAILY_BANNED_PHRASES.some((phrase) => allText.includes(phrase))) {
+    throw new Error("Daily reading used banned old-template language");
+  }
+
+  if (!containsAnyHint(shaped.sections.where_you_may_be_now, DAILY_REAL_LIFE_HINTS)) {
+    throw new Error("Daily reading missed a real-life scenario");
+  }
+
+  if (shaped.card_name === "The Magician" && !containsAnyHint(allText, MAGICIAN_REQUIRED_HINTS)) {
+    throw new Error("The Magician reading missed initiative/resources/action language");
+  }
+
+  return shaped;
+}
+
+function fillDailyTemplate(template, cardName, cardMeaning) {
+  return template
+    .replace(/\{card\}/g, cardName)
+    .replace(/\{meaning\}/g, cardMeaning || "what this card is pointing toward today");
+}
+
+function getDailyFallbackArchetype(cardName) {
+  const normalized = normalizeWhitespace(cardName);
+
+  if (normalized === "The Magician") return "initiative";
+
+  if (
+    [
+      "The Fool",
+      "The Chariot",
+      "Judgement",
+      "Ace of Wands",
+      "Knight of Wands",
+    ].includes(normalized)
+  ) {
+    return "initiative";
+  }
+
+  if (
+    [
+      "The Empress",
+      "The Lovers",
+      "The Sun",
+      "Two of Cups",
+      "Three of Cups",
+      "Ace of Cups",
+      "Ten of Cups",
+      "Queen of Cups",
+      "Knight of Cups",
+    ].includes(normalized) || normalized.includes("Cups")
+  ) {
+    return "connection";
+  }
+
+  if (
+    [
+      "The High Priestess",
+      "The Hermit",
+      "The Hanged Man",
+      "The Moon",
+      "Temperance",
+      "Two of Swords",
+    ].includes(normalized)
+  ) {
+    return "pause";
+  }
+
+  if (
+    [
+      "The Emperor",
+      "Justice",
+      "Strength",
+      "The World",
+    ].includes(normalized)
+  ) {
+    return "truth";
+  }
+
+  if (
+    [
+      "Wheel of Fortune",
+      "Death",
+      "The Devil",
+      "The Tower",
+      "Three of Swords",
+    ].includes(normalized)
+  ) {
+    return "change";
+  }
+
+  return "gentle";
 }
 
 function shortenForQuestion(value, maxSentences = 3, maxChars = 320) {
@@ -97,25 +379,45 @@ function shapeQuestionReading(reading) {
 function buildFallbackReading(payload) {
   if (payload.mode === "daily") {
     const cards = Array.isArray(payload.cards) ? payload.cards : [];
+    const card = cards[0] ?? {};
+    const cardName = String(card.name ?? "Today's Card").trim();
+    const cardMeaning = normalizeWhitespace(card.meaning);
+    const fallbackArchetype = DAILY_FALLBACK_ARCHETYPES[getDailyFallbackArchetype(cardName)];
+    const magicianFallback =
+      cardName === "The Magician"
+        ? {
+            core_insight:
+              "The Magician points to a day when initiative matters more than waiting. The next step may already be within reach.",
+            sections: {
+              what_this_card_reflects:
+                "The Magician represents initiative, resourcefulness, and making something happen with what is already available. Today this card matters because it asks you to stop treating readiness like a distant event and notice the skills, tools, and support you already have.",
+              where_you_may_be_now:
+                "This may show up in a work decision you keep delaying, a message you have drafted but not sent, or a project you want to begin once everything feels perfect. The Magician fits moments where the real next step is not learning more, but using what you already know and starting from there.",
+              one_small_shift:
+                "Use one resource you already have today. Send the draft, reuse the notes, ask the capable person for ten minutes, or begin with the first version instead of waiting for the ideal one.",
+              gentle_reminder:
+                "You may not need more time or more tools today. You may only need to begin with what is already in your hands.",
+            },
+          }
+        : null;
 
     return shapeDailyReading({
       kind: "daily",
-      cardReadings: cards.map((card, index) => ({
-        position: String(card.position ?? `Card ${index + 1}`),
-        card: String(card.name ?? `Card ${index + 1}`),
-        message:
-          String(card.meaning ?? "").trim() ||
-          "This card stays beside you like a quiet light, asking you to soften a little and trust what feels honest today.",
-      })),
-      guidance:
-        "Take a breath and notice how your heart is arriving today. This is not a warning or a prediction, just a gentle place to begin.",
-      todaysEnergy:
-        "Take a breath and notice how your heart is arriving today. This is not a warning or a prediction, just a gentle place to begin.",
-      forYourHeart:
-        "What you need most today may be softness, steadiness, and permission to move at your own pace instead of pushing past yourself.",
-      oneSmallAction:
-        "Set your phone aside for ten quiet minutes and ask yourself: what would feel most supportive to me right now?",
-      companionNote: "Whatever today becomes, you do not have to earn softness before receiving it. I am with you for this moment.",
+      card_name: cardName,
+      core_insight:
+        magicianFallback?.core_insight ??
+        fillDailyTemplate(fallbackArchetype.coreTemplate, cardName, cardMeaning),
+      sections:
+        magicianFallback?.sections ?? {
+          what_this_card_reflects:
+            fillDailyTemplate(fallbackArchetype.reflectsTemplate, cardName, cardMeaning),
+          where_you_may_be_now:
+            fillDailyTemplate(fallbackArchetype.scenarioTemplate, cardName, cardMeaning),
+          one_small_shift:
+            fillDailyTemplate(fallbackArchetype.shiftTemplate, cardName, cardMeaning),
+          gentle_reminder:
+            fillDailyTemplate(fallbackArchetype.reminderTemplate, cardName, cardMeaning),
+        },
       provider: "fallback",
     });
   }
@@ -187,26 +489,39 @@ function buildFallbackReading(payload) {
   });
 }
 
-function buildPrompt(payload) {
+function buildPrompt(payload, correctionNote = "") {
   if (payload.mode === "daily") {
+    const cardNames = payload.cards.map((card) => card.name).join(", ");
     return [
-      "You are the voice of an NFC companion ring in a tarot wellness app.",
+      "You are a grounded tarot companion who helps people notice what is happening in their real life today.",
       "Return JSON only.",
-      "This is a daily companion reading, not a predictive fortune.",
-      "The tone must feel warm, intimate, emotionally intelligent, and lightly spiritual.",
-      "Write as if the ring is gently speaking to the user, not as if an AI is clinically analyzing them.",
-      "Avoid generic coaching language, avoid sounding like a horoscope, avoid hard prediction.",
-      "Use the card as a lens, then offer grounded emotional companionship for today.",
-      "Structure the response like a quiet mobile journal page that can be read in 20 to 30 seconds.",
-      "Each field should feel natural, soft, and human.",
-      "Keep each field brief: usually 1 to 2 short sentences, with breathable rhythm.",
-      "Prefer clarity and softness over richness or explanation.",
-      "Do not include career, money, or productivity advice unless the card absolutely requires it.",
-      "Field responsibilities:",
-      "1. todaysEnergy: the main emotional tone of the day.",
-      "2. forYourHeart: what the user most needs inwardly today.",
-      "3. oneSmallAction: one gentle, concrete action for today.",
-      "4. companionNote: a soft closing line of companionship.",
+      "You do not predict the future.",
+      "Use tarot symbolism to describe a recognizable life situation, not a therapeutic process.",
+      "This is a Daily Reading page for a tarot-inspired emotional companion product.",
+      "The tone must feel personal, conversational, grounded, and specific.",
+      "Write like a thoughtful friend, not a therapist.",
+      "Do NOT write like a spiritual teacher or a motivational speaker.",
+      "Do not turn the reading into a healing article, a mindset lesson, or a poetic affirmation.",
+      "Use the card as a lens for daily life: relationships, home life, feelings, conversations, habits, personal decisions, inner tension, work, or something the user keeps postponing.",
+      "Write like a close friend who understands the user's day.",
+      "The reading must include tarot symbolism, a real-life situation, and one concrete small shift.",
+      "Do not write generalized advice with no real-life anchor.",
+      "Never use these words or phrases: emotional pattern, nervous system, healing journey, inner journey, healing process, transformation, alignment, universe, destiny.",
+      "If a sentence sounds abstract, rewrite it into a concrete daily-life observation before returning JSON.",
+      "Do not default to work or career unless the card strongly points there.",
+      "Across readings, relationship, home, family, friendship, personal life, daily habit, inner conflict, and emotional reality are just as valid as work.",
+      "Prefer concrete situations such as a text message you haven't replied to, a conversation you avoided, tension at home, a relationship dynamic, a family expectation, a habit you want to change, a decision you keep postponing, a feeling you haven't named, or a project at work when it truly fits the card.",
+      `Today's card: ${cardNames}.`,
+      "If the card is The Magician, you must explicitly mention initiative or taking action, and you must refer to existing skills, tools, or resources already available.",
+      "Field requirements:",
+      "1. core_insight: maximum 20 words.",
+      "2. sections.what_this_card_reflects: 35 to 50 words.",
+      "3. sections.where_you_may_be_now: 50 to 70 words, and it MUST include at least one specific real-life scenario such as work, relationship, personal decision, daily habit, or personal goal.",
+      "4. sections.one_small_shift: 30 to 45 words.",
+      "5. sections.gentle_reminder: 15 to 25 words.",
+      "Do not predict the future.",
+      "Do not drift into therapy language, spiritual coaching language, or abstract emotional analysis.",
+      correctionNote ? `Correction note: ${correctionNote}` : "",
       "",
       `Question: ${payload.question}`,
       `Spread Title: ${payload.spreadTitle}`,
@@ -215,14 +530,14 @@ function buildPrompt(payload) {
       "",
       `JSON schema:
 {
-  "kind": "daily",
-  "cardReadings": [
-    { "position": "string", "card": "string", "message": "string" }
-  ],
-  "todaysEnergy": "string",
-  "forYourHeart": "string",
-  "oneSmallAction": "string",
-  "companionNote": "string"
+  "card_name": "string",
+  "core_insight": "string",
+  "sections": {
+    "what_this_card_reflects": "string",
+    "where_you_may_be_now": "string",
+    "one_small_shift": "string",
+    "gentle_reminder": "string"
+  }
 }`,
     ].join("\n");
   }
@@ -274,7 +589,7 @@ function parseReadingJson(raw) {
   return JSON.parse(withoutFence);
 }
 
-async function requestGeminiReading(payload) {
+async function requestGeminiCandidate(payload, correctionNote = "") {
   const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
   const model = process.env.GEMINI_MODEL || "gemini-2.5-flash";
 
@@ -293,12 +608,12 @@ async function requestGeminiReading(payload) {
         contents: [
           {
             role: "user",
-            parts: [{ text: buildPrompt(payload) }],
+            parts: [{ text: buildPrompt(payload, correctionNote) }],
           },
         ],
         generationConfig: {
           responseMimeType: "application/json",
-          temperature: 0.85,
+          temperature: payload.mode === "daily" ? 0.4 : 0.55,
         },
       }),
     },
@@ -309,19 +624,23 @@ async function requestGeminiReading(payload) {
     throw new Error(result?.error?.message ?? "Gemini reading failed");
   }
 
-  const parsed = parseReadingJson(extractJsonText(result));
+  return parseReadingJson(extractJsonText(result));
+}
 
+async function requestGeminiReading(payload) {
   if (payload.mode === "daily") {
-    return shapeDailyReading({
-      kind: "daily",
-      cardReadings: Array.isArray(parsed.cardReadings) ? parsed.cardReadings : [],
-      todaysEnergy: String(parsed.todaysEnergy ?? parsed.guidance ?? ""),
-      forYourHeart: String(parsed.forYourHeart ?? parsed.needToday ?? parsed.love ?? ""),
-      oneSmallAction: String(parsed.oneSmallAction ?? parsed.smallAction ?? ""),
-      companionNote: String(parsed.companionNote ?? ""),
-      provider: "gemini",
-    });
+    // Temporary UI iteration mode: keep Daily Reading stable and quota-free by
+    // always returning local fallback copy instead of calling Gemini.
+    return buildFallbackReading(payload);
   }
+
+  if (payload.mode === "love-energy" || (!payload.mode && Array.isArray(payload.cards) && payload.cards.length >= 3)) {
+    // Temporary UI iteration mode: keep Question Reading stable and quota-free
+    // while the layout is being tuned, including legacy requests that omit mode.
+    return buildFallbackReading(payload);
+  }
+
+  const parsed = await requestGeminiCandidate(payload);
 
   return shapeQuestionReading({
     reflection: String(parsed.reflection ?? ""),

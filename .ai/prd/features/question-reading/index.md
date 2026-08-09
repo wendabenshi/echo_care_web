@@ -2,7 +2,7 @@
 title: "功能模块 PRD：问题解牌"
 version: "1.0.0"
 feature_id: "question-reading"
-last_updated: "2026-07-13"
+last_updated: "2026-08-09"
 owner: "Wenzerong / Codex"
 status: "草稿"
 ---
@@ -69,8 +69,9 @@ A Gentle Reminder
 
 - Hero 要短，并且先给答案。
 - The Bigger Picture 应成为页面高潮。
-- 避免正文卡片容器、分割线、图标、正文插画和视觉噪音。
-- 主要依赖字体层级和留白来组织页面。
+- 避免所有 Section 使用同一种正文卡片模板，防止整页变得厚重和重复。
+- 主要依赖字体层级、留白和少量高权重容器来组织页面。
+- `A Gentle Reminder` 允许使用独立的氛围渐变收尾卡，但应明显区别于前三个单牌解释卡与 `The Bigger Picture` 总结主卡。
 
 ## 6. 技术考量
 
@@ -88,6 +89,8 @@ A Gentle Reminder
   - 第三张：下一步关注方向
 - `combined` 应提供主要答案。
 - `gentleReminder` 应是陪伴式收尾，而不是继续解释牌。
+- 临时调试策略：在问题解牌页 UI / 布局优化阶段，Question Reading 服务端逻辑可临时固定为 fallback-only，不请求 Gemini，避免配额、延迟和输出波动干扰样式验收。
+- 为兼容历史调用，若问题解牌请求未显式传入 `mode`，服务端仍应基于三张牌请求识别为问题解牌流程，并套用相同的临时 fallback 策略。
 
 ## 8. 待解决问题
 
