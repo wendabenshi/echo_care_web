@@ -2,7 +2,7 @@
 title: "功能模块 PRD：问题解牌"
 version: "1.0.0"
 feature_id: "question-reading"
-last_updated: "2026-08-09"
+last_updated: "2026-08-12"
 owner: "Wenzerong / Codex"
 status: "草稿"
 ---
@@ -91,6 +91,11 @@ A Gentle Reminder
 - `gentleReminder` 应是陪伴式收尾，而不是继续解释牌。
 - 临时调试策略：在问题解牌页 UI / 布局优化阶段，Question Reading 服务端逻辑可临时固定为 fallback-only，不请求 Gemini，避免配额、延迟和输出波动干扰样式验收。
 - 为兼容历史调用，若问题解牌请求未显式传入 `mode`，服务端仍应基于三张牌请求识别为问题解牌流程，并套用相同的临时 fallback 策略。
+- 当前视觉调试阶段，Question Reading 的牌背统一使用本地 `Mystic Editorial` 牌背图；三张结果牌与结果页 Hero 应展示与真实抽中牌名一致的本地卡面图，且当前网页抽牌牌池限制为 22 张大阿卡纳。
+- 当前统一规则：牌名与牌图始终由本地抽牌逻辑生成并绑定，不依赖 Gemini。`牌阵标题 / 位置文案 / 解读内容` 必须使用同一个内容源，不允许混搭。
+- 共享内容源由环境变量 `READING_CONTENT_SOURCE` 控制：
+  - `local`：`/api/spread` 与 `/api/reading` 都返回本地 fallback。
+  - `gemini`：`/api/spread` 与 `/api/reading` 都优先请求 Gemini，失败时再分别回退到本地 fallback。
 
 ## 8. 待解决问题
 

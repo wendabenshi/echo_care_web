@@ -16,5 +16,7 @@
 </template>
 
 <script setup>
-const cardImageSrc = "/cards/card-back.webp";
+import { ECHO_CARD_BACK_IMAGE } from "../../data/tarotVisuals.js";
+
+const cardImageSrc = ECHO_CARD_BACK_IMAGE;
 </script>

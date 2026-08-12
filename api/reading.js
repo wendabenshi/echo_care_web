@@ -1,4 +1,5 @@
 const { loadServerEnv } = require("../src/utils/serverEnv");
+const { shouldUseLocalContent } = require("./_content-source");
 
 loadServerEnv();
 
@@ -628,15 +629,7 @@ async function requestGeminiCandidate(payload, correctionNote = "") {
 }
 
 async function requestGeminiReading(payload) {
-  if (payload.mode === "daily") {
-    // Temporary UI iteration mode: keep Daily Reading stable and quota-free by
-    // always returning local fallback copy instead of calling Gemini.
-    return buildFallbackReading(payload);
-  }
-
-  if (payload.mode === "love-energy" || (!payload.mode && Array.isArray(payload.cards) && payload.cards.length >= 3)) {
-    // Temporary UI iteration mode: keep Question Reading stable and quota-free
-    // while the layout is being tuned, including legacy requests that omit mode.
+  if (shouldUseLocalContent()) {
     return buildFallbackReading(payload);
   }
 

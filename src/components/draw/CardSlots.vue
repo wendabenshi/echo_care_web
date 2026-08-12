@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="visible"
-    class="slots-row flex items-center justify-center gap-4 sm:gap-6"
+    class="slots-row flex items-start justify-center gap-4 sm:gap-6"
     style="transform: translateY(-8px);"
   >
     <div
@@ -10,7 +10,7 @@
       class="slot-item flex flex-col items-center gap-1.5"
     >
       <div
-        class="slot-card relative overflow-hidden rounded-lg"
+        class="slot-card relative self-start overflow-hidden rounded-lg"
         style="width: 70px; height: 112px; perspective: 1200px;"
       >
         <div
@@ -22,7 +22,7 @@
             <TarotCardBack />
           </div>
           <div class="slot-face slot-face--front absolute inset-0">
-            <TarotCardFace :label="cardLabel(slot - 1)" />
+            <TarotCardFace :label="cardLabel(slot - 1)" :src="cardImageSrc(slot - 1)" />
           </div>
         </div>
 
@@ -67,6 +67,10 @@ function positionLabel(index) {
 
 function cardLabel(index) {
   return props.draw?.cards?.[index]?.card_name ?? "";
+}
+
+function cardImageSrc(index) {
+  return props.draw?.cards?.[index]?.image_src ?? "";
 }
 
 </script>

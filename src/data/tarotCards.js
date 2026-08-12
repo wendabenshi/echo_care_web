@@ -1,3 +1,5 @@
+import { getEchoCardImage } from "./tarotVisuals.js";
+
 export const LOVE_ENERGY_POSITIONS = [
   "Your heart right now",
   "What's blocking love",
@@ -171,8 +173,7 @@ export function cardImageSlug(label) {
 }
 
 export function cardImageUrl(label) {
-	return "/cards/one.png";
-  return `https://woomoo.app/common/tarot_cards/${cardImageSlug(label)}.webp`;
+  return getEchoCardImage(label) || "/cards/one.png";
 }
 
 /** @type {{ label: string, loveMeaning: string }[]} */
@@ -198,14 +199,6 @@ export const TAROT_CARDS = [
   { label: "The Sun", loveMeaning: "Joy, clarity, and warmth want in. This energy favors honesty, playfulness, and open-heartedness." ,img:"/cards/two.png"},
   { label: "Judgement", loveMeaning: "A wake-up call around love is arriving. Answer it with compassion, not self-judgment.",img:"/cards/three.png" },
   { label: "The World", loveMeaning: "Completion and fulfillment are within reach. A cycle may be ready to mature into something whole." ,img:"/cards/three.png"},
-  { label: "Two of Cups", loveMeaning: "Mutual attraction and emotional reciprocity are highlighted. Connection wants to be balanced." ,img:"/cards/three.png"},
-  { label: "Three of Cups", loveMeaning: "Support, celebration, or friendship may shape the path. Joy grows in shared emotional space." ,img:"/cards/three.png"},
-  { label: "Ace of Cups", loveMeaning: "A fresh emotional opening is possible. Be receptive without abandoning self-respect." ,img:"/cards/three.png"},
-  { label: "Ten of Cups", loveMeaning: "Long-term emotional harmony is the deeper theme. Ask whether this aligns with the life you want." ,img:"/cards/three.png"},
-  { label: "Two of Swords", loveMeaning: "Avoidance may be keeping you in limbo. A decision postponed is still a decision." ,img:"/cards/three.png"},
-  { label: "Three of Swords", loveMeaning: "Pain or disappointment needs acknowledgment before healing can begin.",img:"/cards/three.png" },
-  { label: "Queen of Cups", loveMeaning: "Emotional depth and intuition are your strength. Lead with empathy, not self-erasure.",img:"/cards/three.png" },
-  { label: "Knight of Cups", loveMeaning: "Romantic energy is in motion — through message, invitation, or sincere emotional gesture." ,img:"/cards/three.png"},
 ];
 
 export function getCardByLabel(label) {

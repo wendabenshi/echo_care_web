@@ -6,7 +6,7 @@ status: "草稿"
 owner: "Codex"
 story_points: "TBD"
 created_date: "2026-07-13"
-last_updated: "2026-08-09"
+last_updated: "2026-08-13"
 related_prd_feature: "../index.md"
 ---
 
@@ -104,6 +104,7 @@ related_prd_feature: "../index.md"
 - [ ] 用新的 reading cards / glance row / gentle reminder 替换旧 daily layout。
 - [ ] 调整段落长度、间距、字体层级和 CTA。
 - [x] 将 Daily Reading 末屏 CTA 与 Question Reading 统一为 `Back to Home`，并统一 `A Gentle Reminder` 的渐变收尾卡样式。
+- [x] 接入本地批准的 `Mystic Editorial` 牌背与结果图资源，用于每日结果页视觉验收。
 
 ### 5.2. 验证
 
@@ -155,6 +156,15 @@ related_prd_feature: "../index.md"
 - 2026-08-09 00:00 - Codex：根据最新视觉反馈撤回 Hero 摘要的 serif/italic 处理，恢复到正文体系，并继续把 Hero 标题、摘要和三列摘要的横向宽度统一对齐到 section body 的边距。
 - 2026-08-09 00:00 - Codex：将 Daily Reading 最后一屏改为与 Question Reading 一致的收尾结构，统一 `A Gentle Reminder` 的渐变卡样式、底部 `Back to Home` 按钮和回首页行为，并移除旧版分割线与按钮下辅助文案。
 - 2026-08-09 00:00 - Codex：继续收紧 Daily Reading 最后一屏的提醒卡正文节奏，收窄 `A Gentle Reminder` 的移动端列宽并加入最小高度，让短句在手机上稳定呈现为约 3-4 行，而不是显得过短过空。
+- 2026-08-10 00:00 - Codex：将每日流程的牌背统一切到本地 `Mystic Editorial` 版本，并为翻牌结果页 / 结果面板接入 3 张本地批准样图；Daily Reading 在每次提交时随机取其中 1 张，并在该次流程内保持预览翻牌与结果页一致，方便先专注验收 UI 与氛围。
+- 2026-08-10 00:00 - Codex：修复每日解牌页牌名与图片可能错位的问题；此前每日流程会先本地抽一张牌，再在 spread 请求返回时用另一张随机牌覆盖数据，图片却可能沿用前一张。现改为每日页一旦本地抽到卡牌就整次流程固定该牌，只异步补充 spread 元数据；同时临时将每日抽牌池限制为已有本地图片资产的牌，避免未生成图片的牌落到错误占位图。
+- 2026-08-12 00:00 - Codex：将每日解牌页的“牌阵标题 / 位置文案 / 解读内容”统一纳入共享 `READING_CONTENT_SOURCE` 规则，不再允许 `spread` 与 `reading` 分别切换来源；牌名与牌图继续保持本地抽牌和本地资源绑定。
+- 2026-08-13 00:00 - Codex：根据用户提供的新视觉图，将每日解牌页第一个 section 顶部的原代码 icon 替换为本地静态图片资源，用于验证更具氛围感的章节头图方案。
+- 2026-08-13 00:00 - Codex：继续将用户提供的双 icon 大图切成左右两个独立资源，并分别替换到每日解牌页第 2、3 个 section 顶部，统一三段章节头图的视觉语言。
+- 2026-08-13 00:00 - Codex：进一步统一三张 section 头图的源图画布与内容尺度；将三张资源都重整为相同方形画布并按统一边距重新居中，解决仅靠 CSS 缩放仍会造成视觉大小不一致的问题。
+- 2026-08-13 00:00 - Codex：根据用户最新反馈，将每日解牌页各 section 之间的垂直间距整体再压缩约 10px，保持 section 内部结构不变，仅收紧段落节奏。
+- 2026-08-13 00:00 - Codex：继续根据用户反馈，再次将每日解牌页各 section 之间的垂直间距额外压缩约 10px，进一步收紧长页面的阅读节奏。
+- 2026-08-13 00:00 - Codex：根据用户截图反馈，将第一个 section 与上方 Glance Row 之间的起始留白额外压缩约 15px，不改变各 section 内部结构，仅收紧首个 section 入场位置。
 
 ## 8. AI 交互日志
 
@@ -208,6 +218,8 @@ related_prd_feature: "../index.md"
 - Codex：收缩 fallback archetype 默认示例中的工作场景，让 Daily Reading 即使因限流退回 fallback，也更自然地围绕感情、生活和内心展开。
 - 用户：当前需要优化每日解牌页 UI 布局，不需要 Gemini 真实解读，希望临时固定走 fallback 并部署。
 - Codex：将 Daily Reading API 临时切到 fallback-only，并同步 story 文档，确保后续 UI 调试不再受 Gemini 限额和输出波动影响。
+- 用户：希望以后可以统一控制来源；如果说“全部走 Gemini”，则牌阵标题、位置文案、解读内容都走 Gemini；如果说“走本地”，则这些都走本地，但牌名和牌图始终本地抽取和对应。
+- Codex：实现共享内容源开关 `READING_CONTENT_SOURCE`，让 Daily Reading 的 `api/spread` 与 `api/reading` 保持同源切换；本地调试默认值保持 `local`。
 - 用户：在 section 已经去卡片化后，选择继续执行第 2 项，即再压一档标题和正文。
 - Codex：继续下调 section 的文字尺寸、透明度、列宽和字距，保持结构不变，只收紧阅读层级。
 - 用户：要求把每日解牌页最后一屏的 `A GENTLE REMINDER`、按钮样式和点击事件与问题解牌页统一，并去掉横线和按钮下无关文字。

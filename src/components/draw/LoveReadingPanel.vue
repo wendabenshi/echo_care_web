@@ -37,7 +37,7 @@
                 class="flex min-w-0 flex-1 flex-col items-center gap-2.5"
               >
                 <div class="h-[148px] w-[92px] overflow-hidden rounded-[17px] ring-1 ring-white/10 shadow-[0_14px_34px_rgba(0,0,0,0.28)] md:h-[304px] md:w-[188px] md:rounded-[23px]">
-                  <TarotCardFace :label="slot.label" />
+                  <TarotCardFace :label="slot.label" :src="slot.imageSrc" />
                 </div>
                 <div class="space-y-1 text-center">
                   <p class="hero-slot-position font-woomoo-ui">
@@ -340,16 +340,20 @@ onBeforeUnmount(() => {
 }
 
 .hero-slot-position {
-  max-width: 6.9rem;
+  display: -webkit-box;
+  max-width: 7.4rem;
   margin: 0 auto;
-  font-size: 0.5rem;
+  min-height: 1.36rem;
+  font-size: 0.48rem;
   text-transform: uppercase;
-  line-height: 1.18;
-  letter-spacing: 0.16em;
+  line-height: 1.32;
+  letter-spacing: 0.13em;
   color: rgba(255, 255, 255, 0.28);
-  white-space: nowrap;
+  white-space: normal;
   overflow: hidden;
-  text-overflow: ellipsis;
+  text-overflow: clip;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 @media (min-width: 768px) {

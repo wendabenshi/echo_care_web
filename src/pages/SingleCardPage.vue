@@ -177,6 +177,7 @@ const readingSlots = computed(() => {
   return cards.map((card, index) => ({
     label: card.label,
     position: draw.value.position_meanings[index] ?? "",
+    imageSrc: draw.value.cards?.[index]?.image_src ?? "",
   }));
 });
 

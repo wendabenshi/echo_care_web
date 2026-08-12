@@ -65,6 +65,7 @@
                         <TarotCardFace
                           v-if="selectedCardLabel"
                           :label="selectedCardLabel"
+                          :src="selectedCardImageSrc"
                         />
                       </div>
                     </div>
@@ -148,6 +149,7 @@ import QuestionBar from "../components/draw/QuestionBar.vue";
 import StarfieldBackground from "../components/StarfieldBackground.vue";
 import TarotCardBack from "../components/draw/TarotCardBack.vue";
 import TarotCardFace from "../components/draw/TarotCardFace.vue";
+import { getEchoCardImage } from "../data/tarotVisuals.js";
 import {
   createSingleCardDraw,
   resolveSlotCards,
@@ -188,10 +190,12 @@ const readingSlots = computed(() => {
   return cards.map((card, index) => ({
     label: card.label,
     position: draw.value.position_meanings[index] ?? "",
+    imageSrc: draw.value.cards?.[index]?.image_src ?? "",
   }));
 });
 
 const selectedCardLabel = computed(() => draw.value?.cards?.[0]?.card_name ?? "");
+const selectedCardImageSrc = computed(() => draw.value?.cards?.[0]?.image_src ?? "");
 
 const timers = [];
 
@@ -212,10 +216,17 @@ function selectChip(text) {
 
 async function onSubmit(text) {
   const normalizedQuestion = String(text ?? "").trim() || DAILY_QUESTION;
+  const baseDraw = createSingleCardDraw(normalizedQuestion);
   submittedQuestion.value = text;
   submitted.value = true;
   pickingEnabled.value = true;
-  draw.value = createSingleCardDraw(normalizedQuestion);
+  draw.value = {
+    ...baseDraw,
+    cards: baseDraw.cards.map((card) => ({
+      ...card,
+      image_src: getEchoCardImage(card.card_name),
+    })),
+  };
   showReading.value = false;
   readingText.value = "";
   readingData.value = null;
@@ -226,7 +237,12 @@ async function onSubmit(text) {
   simulateSingleDraw(normalizedQuestion, { mode: "daily" })
     .then((nextDraw) => {
       if (!submitted.value || submittedQuestion.value !== normalizedQuestion) return;
-      draw.value = nextDraw;
+      draw.value = {
+        ...draw.value,
+        spread_name: nextDraw.spread_name,
+        position_meanings: nextDraw.position_meanings,
+        position_tags: nextDraw.position_tags,
+      };
     })
     .catch(() => {
       // Keep the locally created card so the daily ritual never blocks on spread metadata.

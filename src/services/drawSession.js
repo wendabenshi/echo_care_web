@@ -1,14 +1,25 @@
 import {
   LOVE_ENERGY_POSITIONS,
   SINGLE_CARD_POSITIONS,
-  pickDistinctCards,
   getCardByLabel,
+  TAROT_CARDS,
+  shuffle,
 } from "../data/tarotCards.js";
+import { getEchoCardImage } from "../data/tarotVisuals.js";
+
+function withEchoImage(card) {
+  return {
+    card_name: card.label,
+    image_src: getEchoCardImage(card.label),
+  };
+}
+
+function pickDistinctVisualReadyCards(count = 3) {
+  return shuffle(TAROT_CARDS.filter((card) => getEchoCardImage(card.label))).slice(0, count);
+}
 
 export function createLoveEnergyDraw(question) {
-  const cards = pickDistinctCards(3).map((card) => ({
-    card_name: card.label,
-  }));
+  const cards = pickDistinctVisualReadyCards(3).map(withEchoImage);
 
   return {
     question,
@@ -79,9 +90,7 @@ export function simulateDraw(question) {
       spread.positions?.map((item) => item.title).filter(Boolean).slice(0, 3) || [...LOVE_ENERGY_POSITIONS],
     position_tags:
       spread.positions?.map((item) => Array.isArray(item.tags) ? item.tags : []).slice(0, 3) || [],
-    cards: pickDistinctCards(3).map((card) => ({
-      card_name: card.label,
-    })),
+    cards: pickDistinctVisualReadyCards(3).map(withEchoImage),
   }));
 }
 
@@ -103,9 +112,7 @@ export function simulateInterpret(question, draw) {
 }
 
 export function createSingleCardDraw(question) {
-  const cards = pickDistinctCards(1).map((card) => ({
-    card_name: card.label,
-  }));
+  const cards = pickDistinctVisualReadyCards(1).map(withEchoImage);
 
   return {
     question,
@@ -139,9 +146,7 @@ export function simulateSingleDraw(question, options = {}) {
       spread.positions?.map((item) => item.title).filter(Boolean).slice(0, 1) || [...SINGLE_CARD_POSITIONS],
     position_tags:
       spread.positions?.map((item) => Array.isArray(item.tags) ? item.tags : []).slice(0, 1) || [],
-    cards: pickDistinctCards(1).map((card) => ({
-      card_name: card.label,
-    })),
+    cards: pickDistinctVisualReadyCards(1).map(withEchoImage),
   }));
 }
 

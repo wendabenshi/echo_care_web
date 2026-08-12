@@ -34,7 +34,7 @@
                   style="background: radial-gradient(circle at center, rgba(92, 83, 168, 0.42) 0%, rgba(92, 83, 168, 0.16) 42%, rgba(92, 83, 168, 0) 76%);"
                 />
                 <div class="relative h-[216px] w-[134px] overflow-hidden rounded-[21px] ring-1 ring-white/10 shadow-[0_22px_48px_rgba(0,0,0,0.33)]">
-                  <TarotCardFace :label="primaryCardLabel" />
+                  <TarotCardFace :label="primaryCardLabel" :src="primaryCardImageSrc" />
                 </div>
               </div>
 
@@ -64,7 +64,7 @@
               </div>
             </div>
 
-            <div class="mt-16 space-y-[3.8rem] md:mt-20 md:space-y-[4.4rem]">
+            <div class="mt-[calc(4rem-15px)] space-y-[calc(3.8rem-20px)] md:mt-[calc(5rem-15px)] md:space-y-[calc(4.4rem-20px)]">
               <section
                 v-for="section in readingSections"
                 :key="section.key"
@@ -75,8 +75,16 @@
                   aria-hidden="true"
                   :class="section.iconClass"
                 >
-                  <div class="reading-section-icon-orb" />
-                  <div class="reading-section-icon-core">
+                  <img
+                    v-if="section.imageSrc"
+                    :src="section.imageSrc"
+                    :alt="section.label"
+                    class="reading-section-image"
+                    :class="`reading-section-image--${section.key}`"
+                  />
+                  <template v-else>
+                    <div class="reading-section-icon-orb" />
+                    <div class="reading-section-icon-core">
                     <div
                       v-if="section.key === 'reflect'"
                       class="icon-heart"
@@ -101,7 +109,8 @@
                       <span />
                       <span />
                     </div>
-                  </div>
+                    </div>
+                  </template>
                 </div>
                 <p class="reading-section-label font-woomoo-ui">
                   {{ section.label }}
@@ -236,6 +245,8 @@ const primaryCardLabel = computed(
   () => normalizeText(props.readingData?.card_name) || props.slots?.[0]?.label || "Today's Card",
 );
 
+const primaryCardImageSrc = computed(() => props.slots?.[0]?.imageSrc ?? "");
+
 const coreInsightText = computed(() =>
   normalizeText(props.readingData?.core_insight) ||
   normalizeText(
@@ -333,6 +344,7 @@ const readingSections = computed(() =>
       label: "What This Card Reflects",
       title: "Tarot Symbolism Today",
       iconClass: "is-heart",
+      imageSrc: "/section-art/daily-reflect-orb.png",
       body: reflectText.value,
     },
     {
@@ -340,6 +352,7 @@ const readingSections = computed(() =>
       label: "Where You May Be Now",
       title: "A Real-Life Mirror",
       iconClass: "is-stairs",
+      imageSrc: "/section-art/daily-where-orb.png",
       body: whereNowText.value,
     },
     {
@@ -347,6 +360,7 @@ const readingSections = computed(() =>
       label: "One Small Shift",
       title: "A Gentle Next Move",
       iconClass: "is-ribbon",
+      imageSrc: "/section-art/daily-shift-orb.png",
       body: smallShiftText.value,
     },
   ].filter((section) => section.body),
@@ -419,11 +433,32 @@ onBeforeUnmount(() => {
 
 .reading-section-icon {
   position: relative;
-  margin: 0 auto 1.2rem;
+  margin: 0 auto calc(1.2rem - 15px);
   display: grid;
   place-items: center;
   width: 4.4rem;
   height: 4.4rem;
+}
+
+.reading-section-image {
+  position: absolute;
+  inset: 50%;
+  z-index: 2;
+  width: 5rem;
+  max-width: none;
+  transform: translate(-50%, -50%);
+  object-fit: contain;
+  filter: drop-shadow(0 12px 28px rgba(135, 118, 242, 0.24));
+  pointer-events: none;
+}
+
+.reading-section-image--reflect {
+  width: 4.5rem;
+}
+
+.reading-section-image--where,
+.reading-section-image--shift {
+  width: 5.1rem;
 }
 
 .reading-section-icon-orb {

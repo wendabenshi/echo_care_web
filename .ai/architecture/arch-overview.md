@@ -1,7 +1,7 @@
 ---
 title: "Echo Care Web 架构概览"
 version: "1.0.0"
-last_updated: "2026-07-13"
+last_updated: "2026-08-12"
 status: "草稿"
 ---
 
@@ -40,8 +40,11 @@ graph TD
     Verify --> Home["首页 / 抽牌入口"]
     Home --> Daily["每日陪伴流程"]
     Home --> Question["问题解牌流程"]
+    Daily --> SpreadAPI["/api/spread"]
+    Question --> SpreadAPI
     Daily --> ReadingAPI["/api/reading"]
     Question --> ReadingAPI
+    SpreadAPI --> Gemini["Gemini API"]
     ReadingAPI --> Gemini["Gemini API"]
     Entry --> Events["/api/ring-events"]
     Daily --> Events
@@ -58,6 +61,7 @@ graph TD
 - 问题结果面板：`src/components/draw/LoveReadingPanel.vue`
 - 抽牌与解读服务：`src/services/drawSession.js`
 - 解读 API：`api/reading.js`
+- 牌阵 API：`api/spread.js`
 - 戒指事件 API：`api/ring-events.js`
 - 戒指校验 API：`api/ring-verify.js`
 
@@ -93,6 +97,16 @@ graph TD
 - UX 应先给答案，再解释原因。
 
 Gemini 输出需要同时通过 API prompt 和前端格式化进行约束。
+
+当前内容来源规则：
+
+- 牌名与牌图始终由前端本地抽牌逻辑生成并绑定。
+- `api/spread.js` 负责牌阵标题与位置文案。
+- `api/reading.js` 负责解读内容。
+- `牌阵标题 / 位置文案 / 解读内容` 必须使用同一个共享内容源，不允许出现一部分走 Gemini、一部分走 fallback 的混搭状态。
+- 共享环境变量：`READING_CONTENT_SOURCE`
+  - `local`：`/api/spread` 和 `/api/reading` 都返回本地 fallback。
+  - `gemini`：`/api/spread` 和 `/api/reading` 都优先请求 Gemini，失败时再分别回退到 fallback。
 
 当前约定的结构重点：
 

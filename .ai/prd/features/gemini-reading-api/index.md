@@ -2,7 +2,7 @@
 title: "功能模块 PRD：Gemini 解读 API"
 version: "1.0.0"
 feature_id: "gemini-reading-api"
-last_updated: "2026-07-13"
+last_updated: "2026-08-12"
 owner: "Wenzerong / Codex"
 status: "草稿"
 ---
@@ -45,12 +45,21 @@ Gemini 解读 API 通过 Vercel Serverless Function，为每日陪伴和问题�
   - `GEMINI_API_KEY`
   - `GOOGLE_API_KEY`
   - `GEMINI_MODEL`
+  - `READING_CONTENT_SOURCE`
 - 默认模型：`gemini-2.5-flash`
 - 返回类型：
   - `daily`
   - `question`
 
 ## 6. 数据 / 业务规则
+
+共享内容源规则：
+
+- 牌名与牌图始终由本地抽牌逻辑生成并绑定，不依赖 Gemini。
+- `牌阵标题 / 位置文案 / 解读内容` 必须使用同一个内容源，不允许局部 Gemini、局部 fallback 的混搭状态。
+- `READING_CONTENT_SOURCE` 取值：
+  - `local`：`api/spread.js` 与 `api/reading.js` 全部返回本地 fallback。
+  - `gemini`：`api/spread.js` 与 `api/reading.js` 全部优先请求 Gemini，失败时再回退到本地 fallback。
 
 问题解牌 JSON：
 
@@ -71,16 +80,14 @@ Gemini 解读 API 通过 Vercel Serverless Function，为每日陪伴和问题�
 ```json
 {
   "kind": "daily",
-  "cardReadings": [
-    { "position": "string", "card": "string", "message": "string" }
-  ],
-  "guidance": "string",
-  "love": "string",
-  "career": "string",
-  "wealth": "string",
-  "needToday": "string",
-  "smallAction": "string",
-  "companionNote": "string"
+  "card_name": "string",
+  "core_insight": "string",
+  "sections": {
+    "what_this_card_reflects": "string",
+    "where_you_may_be_now": "string",
+    "one_small_shift": "string",
+    "gentle_reminder": "string"
+  }
 }
 ```
 

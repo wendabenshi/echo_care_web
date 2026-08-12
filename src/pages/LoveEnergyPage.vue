@@ -133,6 +133,7 @@ import QuestionBar from "../components/draw/QuestionBar.vue";
 import LoveReadingPanel from "../components/draw/LoveReadingPanel.vue";
 import SiteHeader from "../components/SiteHeader.vue";
 import StarfieldBackground from "../components/StarfieldBackground.vue";
+import { getEchoCardImage } from "../data/tarotVisuals.js";
 import {
   createLoveEnergyDraw,
   resolveSlotCards,
@@ -193,6 +194,7 @@ const readingSlots = computed(() => {
     position: draw.value.position_meanings[index] ?? "",
     heroPosition: getHeroPositionLabel(draw.value.position_meanings[index] ?? "", index),
     tags: Array.isArray(draw.value.position_tags?.[index]) ? draw.value.position_tags[index] : [],
+    imageSrc: draw.value.cards?.[index]?.image_src ?? "",
   }));
 });
 
@@ -224,7 +226,13 @@ async function onSubmit(text) {
   submittedQuestion.value = text;
   submitted.value = true;
   pickingEnabled.value = false;
-  draw.value = baseDraw;
+  draw.value = {
+    ...baseDraw,
+    cards: baseDraw.cards.map((card) => ({
+      ...card,
+      image_src: getEchoCardImage(card.card_name),
+    })),
+  };
   pickedFanIndices.value = [];
   flippedSlots.value = [false, false, false];
   showReading.value = false;

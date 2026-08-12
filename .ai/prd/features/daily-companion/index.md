@@ -2,7 +2,7 @@
 title: "功能模块 PRD：每日陪伴"
 version: "1.0.0"
 feature_id: "daily-companion"
-last_updated: "2026-08-07"
+last_updated: "2026-08-12"
 owner: "Wenzerong / Codex"
 status: "草稿"
 ---
@@ -59,6 +59,7 @@ status: "草稿"
     - `WHERE YOU MAY BE NOW`
     - `ONE SMALL SHIFT`
   - `A GENTLE REMINDER`
+- 当前视觉调试阶段，Daily Reading 牌背统一使用本地 `Mystic Editorial` 牌背图；抽牌牌池限制为本地 22 张大阿卡纳，翻牌结果与结果页 Hero 应展示与真实抽中牌名一致的本地卡面图。
 
 ## 6. 技术考量
 
@@ -71,6 +72,7 @@ status: "草稿"
 ## 7. 数据 / 业务规则
 
 - 每日模式使用一张牌。
+- 当前网页每日抽牌仅从 22 张大阿卡纳中抽取，不包含小阿卡纳。
 - 每日解读不应该像预测，而应借塔罗象征帮助用户理解情绪、现实情境和小幅调整方向。
 - 用户可见文案应简短、有情绪支持感，同时必须和现实生活场景有关联。
 - Daily Reading 的目标 JSON 结构为：
@@ -89,6 +91,10 @@ status: "草稿"
   - `heart`
   - `step`
 - Daily Reading 内容长度目标应控制在约 180-220 词，避免写成心理疗愈文章。
+- 当前统一规则：牌名与牌图始终由本地抽牌逻辑生成并绑定，不依赖 Gemini。`牌阵标题 / 位置文案 / 解读内容` 必须使用同一个内容源，不允许混搭。
+- 共享内容源由环境变量 `READING_CONTENT_SOURCE` 控制：
+  - `local`：`/api/spread` 与 `/api/reading` 都返回本地 fallback。
+  - `gemini`：`/api/spread` 与 `/api/reading` 都优先请求 Gemini，失败时再分别回退到本地 fallback。
 
 ## 8. 待解决问题
 

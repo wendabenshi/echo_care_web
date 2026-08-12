@@ -1,4 +1,5 @@
 const { loadServerEnv } = require("../src/utils/serverEnv");
+const { shouldUseLocalContent } = require("./_content-source");
 
 loadServerEnv();
 
@@ -93,6 +94,10 @@ function parseJson(raw) {
 }
 
 async function requestGeminiSpread(question, mode) {
+  if (shouldUseLocalContent()) {
+    return fallbackSpread(mode, question);
+  }
+
   const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
   const model = process.env.GEMINI_MODEL || "gemini-2.5-flash";
 

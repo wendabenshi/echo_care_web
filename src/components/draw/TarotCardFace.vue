@@ -31,8 +31,9 @@ import { cardImageUrl } from "../../data/tarotCards.js";
 
 const props = defineProps({
   label: { type: String, required: true },
+  src: { type: String, default: "" },
 });
 
 const imageFailed = ref(false);
-const imageUrl = computed(() => cardImageUrl(props.label));
+const imageUrl = computed(() => props.src || cardImageUrl(props.label));
 </script>
