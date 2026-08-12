@@ -444,6 +444,7 @@ onBeforeUnmount(() => {
   position: absolute;
   inset: 50%;
   z-index: 2;
+  display: block;
   width: 5rem;
   max-width: none;
   transform: translate(-50%, -50%);
@@ -459,6 +460,15 @@ onBeforeUnmount(() => {
 .reading-section-image--where,
 .reading-section-image--shift {
   width: 5.1rem;
+}
+
+.reading-section-image--where {
+  width: 5.38rem;
+  filter:
+    drop-shadow(0 14px 34px rgba(135, 118, 242, 0.3))
+    brightness(1.22)
+    saturate(1.08)
+    contrast(1.02);
 }
 
 .reading-section-icon-orb {
