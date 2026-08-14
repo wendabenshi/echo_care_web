@@ -1,5 +1,6 @@
 const { loadServerEnv } = require("../src/utils/serverEnv");
 const { shouldUseLocalContent } = require("./_content-source");
+const { requestJson } = require("./_ai-provider");
 
 loadServerEnv();
 
@@ -30,6 +31,18 @@ function fallbackSpread(mode, question) {
           title: "The message for you today",
           tags: ["Clarity", "Support", "Presence"],
         },
+      ],
+      provider: "fallback",
+    };
+  }
+
+  if (mode === "love-energy") {
+    return {
+      spreadTitle: "Three-Card Reflection",
+      positions: [
+        { title: "The Situation", tags: [] },
+        { title: "What's Shaping It", tags: [] },
+        { title: "What To Consider", tags: [] },
       ],
       provider: "fallback",
     };
@@ -85,54 +98,19 @@ function buildPrompt(question, mode) {
   ].join("\n");
 }
 
-function extractJsonText(result) {
-  return result?.candidates?.[0]?.content?.parts?.map((part) => part.text ?? "").join("").trim() ?? "";
-}
-
-function parseJson(raw) {
-  return JSON.parse(raw.replace(/^```json\s*|\s*```$/g, "").trim());
-}
-
-async function requestGeminiSpread(question, mode) {
+async function requestSpread(question, mode) {
   if (shouldUseLocalContent(mode)) {
     return fallbackSpread(mode, question);
   }
 
-  const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
-  const model = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+  const { value: parsed, provider } = await requestJson(buildPrompt(question, mode), {
+    temperature: 0.9,
+  });
 
-  if (!apiKey) {
+  if (!parsed) {
     return fallbackSpread(mode, question);
   }
 
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        contents: [
-          {
-            role: "user",
-            parts: [{ text: buildPrompt(question, mode) }],
-          },
-        ],
-        generationConfig: {
-          responseMimeType: "application/json",
-          temperature: 0.9,
-        },
-      }),
-    },
-  );
-
-  const result = await response.json().catch(() => null);
-  if (!response.ok || !result) {
-    throw new Error(result?.error?.message ?? "Gemini spread failed");
-  }
-
-  const parsed = parseJson(extractJsonText(result));
   return {
     spreadTitle: String(parsed.spreadTitle ?? ""),
     positions: Array.isArray(parsed.positions)
@@ -141,7 +119,7 @@ async function requestGeminiSpread(question, mode) {
           tags: Array.isArray(item?.tags) ? item.tags.map((tag) => String(tag ?? "")).filter(Boolean).slice(0, 3) : [],
         }))
       : [],
-    provider: "gemini",
+    provider,
   };
 }
 
@@ -165,7 +143,7 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const spread = await requestGeminiSpread(question, mode);
+    const spread = await requestSpread(question, mode);
     return json(res, 200, { ok: true, spread });
   } catch (error) {
     return json(res, 200, {

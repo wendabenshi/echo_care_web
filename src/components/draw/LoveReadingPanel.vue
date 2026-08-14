@@ -83,7 +83,7 @@
                     <p
                       v-for="(paragraph, paragraphIndex) in section.paragraphs"
                       :key="paragraphIndex"
-                      class="font-woomoo-body text-[0.9rem] leading-[1.14] text-[rgba(214,210,223,0.5)] md:text-[0.95rem]"
+                      class="font-woomoo-body text-[0.9rem] leading-[1.42] text-[rgba(214,210,223,0.5)] md:text-[0.95rem]"
                     >
                       {{ paragraph }}
                     </p>
@@ -263,10 +263,13 @@ const paragraphs = computed(() =>
 );
 
 const heroInsight = computed(() => {
+  const reflection = String(props.readingData?.reflection ?? "").trim();
+  if (reflection) return reflection;
+
   const combined = String(props.readingData?.combined ?? "").trim();
   const sentences = sentenceSplit(combined).map((sentence) => sentence.trim()).filter(Boolean);
   const firstSentence = sentences[0] ?? "The cards are gathering your answer.";
-  return clampText(firstSentence, 96);
+  return clampText(firstSentence, 96).replace(/…$/, "");
 });
 
 const cardSectionLabels = [
@@ -281,7 +284,11 @@ const cardSections = computed(() =>
     return {
       label: cardSectionLabels[index] ?? item.position ?? "",
       card: item.card ?? "",
-      tags: Array.isArray(props.slots?.[index]?.tags) ? props.slots[index].tags.slice(0, 3) : [],
+      tags: Array.isArray(item.tags)
+        ? item.tags.slice(0, 3)
+        : Array.isArray(props.slots?.[index]?.tags)
+          ? props.slots[index].tags.slice(0, 3)
+          : [],
       paragraphs: [parsed.headline, ...parsed.bodyParagraphs].filter(Boolean),
     };
   }),
@@ -329,10 +336,7 @@ onBeforeUnmount(() => {
 }
 
 .hero-insight-copy {
-  display: -webkit-box;
-  overflow: hidden;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  max-width: 380px;
 }
 
 .hero-slot-position {

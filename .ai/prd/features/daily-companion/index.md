@@ -2,7 +2,7 @@
 title: "功能模块 PRD：每日陪伴"
 version: "1.0.0"
 feature_id: "daily-companion"
-last_updated: "2026-08-12"
+last_updated: "2026-08-14"
 owner: "Wenzerong / Codex"
 status: "草稿"
 ---
@@ -59,7 +59,7 @@ status: "草稿"
     - `WHERE YOU MAY BE NOW`
     - `ONE SMALL SHIFT`
   - `A GENTLE REMINDER`
-- 当前视觉调试阶段，Daily Reading 牌背统一使用本地 `Mystic Editorial` 牌背图；抽牌牌池限制为本地 22 张大阿卡纳，翻牌结果与结果页 Hero 应展示与真实抽中牌名一致的本地卡面图。
+- 当前视觉调试阶段，Daily Reading 牌背统一使用本地 `Mystic Editorial` 牌背图；抽牌牌池已扩展为本地完整 78 张塔罗牌（22 张大阿卡纳 + 56 张小阿卡纳），翻牌结果与结果页 Hero 应展示与真实抽中牌名一致的本地卡面图。
 
 ## 6. 技术考量
 
@@ -72,7 +72,7 @@ status: "草稿"
 ## 7. 数据 / 业务规则
 
 - 每日模式使用一张牌。
-- 当前网页每日抽牌仅从 22 张大阿卡纳中抽取，不包含小阿卡纳。
+- 当前网页每日抽牌从本地完整 78 张塔罗牌中抽取，包含大阿卡纳与小阿卡纳。
 - 每日解读不应该像预测，而应借塔罗象征帮助用户理解情绪、现实情境和小幅调整方向。
 - 用户可见文案应简短、有情绪支持感，同时必须和现实生活场景有关联。
 - Daily Reading 的目标 JSON 结构为：

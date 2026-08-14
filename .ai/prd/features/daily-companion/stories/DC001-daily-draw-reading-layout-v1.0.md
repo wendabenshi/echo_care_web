@@ -278,3 +278,7 @@ related_prd_feature: "../index.md"
 - Codex：将 Daily Reading 的末屏收尾改为与 Question Reading 共用同类视觉语言和交互逻辑，CTA 改为回首页，移除旧 `draw again` 的分割线和辅助文案。
 - 用户：指出每日解牌页最后一屏的 `A GENTLE REMINDER` 内容显得太少，希望固定在 3-4 行，并参考问题解牌页的字体气质。
 - Codex：在 `DailyReadingPanel.vue` 中将提醒卡正文显式对齐到问题解牌页使用的 serif 文本体系，同时收窄正文列宽并补入最小高度，让短句在真机上更稳定地落到 3-4 行。
+- 用户：已获取 DeepSeek API key，希望 AI provider 可切换为 DeepSeek。
+- Codex：Daily Reading 复用统一 AI provider 适配层；当 `AI_PROVIDER=deepseek` 且配置 `DEEPSEEK_API_KEY` 时，牌阵/解读请求使用 DeepSeek，失败时保持本地 fallback。
+- 用户：要求每日解牌页也切换到 DeepSeek。
+- Codex：将 Daily Reading 内容源切换为 AI，并由 `AI_PROVIDER=deepseek` 统一请求 DeepSeek；牌名与牌图继续由本地抽牌逻辑绑定，接口失败仍回退本地内容。

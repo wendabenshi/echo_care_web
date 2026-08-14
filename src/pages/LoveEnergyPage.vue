@@ -186,7 +186,9 @@ const readingSlots = computed(() => {
     label: card.label,
     position: draw.value.position_meanings[index] ?? "",
     heroPosition: getHeroPositionLabel(draw.value.position_meanings[index] ?? "", index),
-    tags: Array.isArray(draw.value.position_tags?.[index]) ? draw.value.position_tags[index] : [],
+    tags: Array.isArray(readingData.value?.cardReadings?.[index]?.tags)
+      ? readingData.value.cardReadings[index].tags
+      : [],
     imageSrc: draw.value.cards?.[index]?.image_src ?? "",
   }));
 });

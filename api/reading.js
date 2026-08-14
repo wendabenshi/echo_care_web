@@ -1,5 +1,6 @@
 const { loadServerEnv } = require("../src/utils/serverEnv");
 const { shouldUseLocalContent } = require("./_content-source");
+const { requestJson } = require("./_ai-provider");
 
 loadServerEnv();
 
@@ -360,11 +361,14 @@ function shortenForQuestion(value, maxSentences = 3, maxChars = 320) {
 function shapeQuestionReading(reading) {
   return {
     kind: "question",
-    reflection: shortenForQuestion(reading.reflection, 2, 220),
+    reflection: shortenToWordLimit(reading.reflection, 18, 140),
     cardReadings: Array.isArray(reading.cardReadings)
       ? reading.cardReadings.slice(0, 3).map((item, index) => ({
           position: normalizeWhitespace(item?.position || `Card ${index + 1}`),
           card: normalizeWhitespace(item?.card || `Card ${index + 1}`),
+          tags: Array.isArray(item?.tags)
+            ? item.tags.map((tag) => normalizeWhitespace(tag)).filter(Boolean).slice(0, 3)
+            : [],
           message: shortenForQuestion(item?.message, 3, 320),
         }))
       : [],
@@ -375,6 +379,48 @@ function shapeQuestionReading(reading) {
       : [],
     provider: reading.provider || "fallback",
   };
+}
+
+function countWords(value) {
+  return normalizeWhitespace(value).split(/\s+/).filter(Boolean).length;
+}
+
+function validateQuestionReadingCandidate(candidate, payload) {
+  if (!Array.isArray(payload.cards) || payload.cards.length !== 3) {
+    throw new Error("Question reading requires exactly 3 cards");
+  }
+
+  if (!normalizeWhitespace(candidate.reflection)) {
+    throw new Error("Question reading has an empty Three-Card Insight");
+  }
+
+  if (!Array.isArray(candidate.cardReadings) || candidate.cardReadings.length !== 3) {
+    throw new Error("Question reading requires exactly 3 card readings");
+  }
+
+  candidate.cardReadings.forEach((item, index) => {
+    if (!normalizeWhitespace(item?.message)) {
+      throw new Error(`Question reading card ${index + 1} has an empty interpretation`);
+    }
+
+    if (!Array.isArray(item?.tags) || item.tags.length !== 3) {
+      throw new Error(`Question reading card ${index + 1} requires exactly 3 chips`);
+    }
+
+    item.tags.forEach((tag) => {
+      if (!normalizeWhitespace(tag) || countWords(tag) > 2) {
+        throw new Error(`Question reading card ${index + 1} has an invalid chip`);
+      }
+    });
+  });
+
+  if (!normalizeWhitespace(candidate.combined)) {
+    throw new Error("Question reading has an empty Bigger Picture");
+  }
+
+  if (!normalizeWhitespace(candidate.gentleReminder)) {
+    throw new Error("Question reading has an empty Reminder");
+  }
 }
 
 function buildFallbackReading(payload) {
@@ -428,8 +474,8 @@ function buildFallbackReading(payload) {
   const isSingleCard = cards.length <= 1;
 
   const reflection = question
-    ? `You do not need to solve everything at once. The fact that you asked "${question}" already tells us this matters deeply to you, and that honesty deserves gentleness.`
-    : "You do not need to solve everything at once. Taking a quiet moment to ask is already part of the answer.";
+    ? `The cards offer a grounded way to look at "${question}" before you decide what to do next.`
+    : "The cards offer a grounded way to look at this question before you decide what to do next.";
 
   const cardRoles = [
     {
@@ -544,22 +590,25 @@ function buildPrompt(payload, correctionNote = "") {
   }
 
   return [
-    "You are a calm emotional companion, not a cold fortune teller.",
-    "Return JSON only.",
-    "The reading must include: reflection, cardReadings, combined, gentleReminder, followUps.",
-    "Design principle: answer first, explanation second.",
-    "This is a question reading. The user wants a clear answer to their question, not a long tarot essay.",
-    "Tone requirements: warm, supportive, emotionally intelligent, lightly spiritual, never harsh, never over-predictive.",
-    "Write like an Apple Journal / Calm emotional companion: simple, spacious, human, and concise.",
-    "Avoid tarot jargon unless it is the card name. Avoid words like destiny, prediction, fate, guaranteed, or timing certainty.",
-    "Each cardReading must have a different job:",
-    "1. First card: the user's current emotional state.",
-    "2. Second card: what is influencing or shaping the situation.",
-    "3. Third card: where to focus next.",
-    "For each cardReading.message, write 2 to 3 short sentences. The first sentence must be a clear headline-like sentence.",
-    "combined is the main answer. Start with a memorable 1 to 2 sentence answer, then add 1 to 2 short supporting sentences.",
-    "gentleReminder should be 1 to 2 short sentences of companionship, not another card explanation.",
-    "Follow-up questions should be short, emotionally insightful, and easy to continue with.",
+    "You are a grounded tarot-informed reflection companion.",
+    "Return exactly one valid JSON object and nothing else. Never use Markdown fences.",
+    "Use the user's question, each current card, and that card's current spread position together.",
+    "This is a question reading, not a generic tarot reading and not a love-only reading.",
+    "Write like a thoughtful friend who understands a real situation: concrete, conversational, calm, and specific.",
+    "Answer the user's actual question conditionally; do not make a definite prediction or claim certainty about another person's thoughts.",
+    "Use observable life details such as a message to send, a conversation to have, a boundary to clarify, a decision to make, or a pattern in someone's behavior.",
+    "Do not write like a therapist, spiritual teacher, motivational speaker, or fortune teller.",
+    "Do not use: emotional pattern, nervous system, healing journey, inner journey, spiritual power, energy exchange, inner wholeness, inner knowing, the answer is within you, the universe, destiny, alignment, possible outcome, what they feel.",
+    "Do not use generic spiritual or emotional keywords as chips.",
+    "Each cardReading must clearly respond to its own position and card while staying connected to the user's question.",
+    "Card 1 explains what is happening in the situation now.",
+    "Card 2 explains what may be affecting or shaping the situation.",
+    "Card 3 explains what the user should keep in mind before acting.",
+    "reflection is the Three-Card Insight shown above the detailed cards. Write one direct sentence of 12 to 18 words so it fits fully within two mobile lines. Do not use an ellipsis.",
+    "For each cardReading, generate exactly 3 dynamic chips from the user's question, that card, and its position. Each chip must be 1 or 2 concrete words.",
+    "For each cardReading.message, write 2 to 3 short sentences with at least one concrete real-life observation.",
+    "combined is the Bigger Picture: answer the question using all three cards without repeating each card reading.",
+    "gentleReminder is a short grounded closing note, not another card explanation.",
     "",
     `Question: ${payload.question}`,
     `Spread Title: ${payload.spreadTitle}`,
@@ -570,7 +619,9 @@ function buildPrompt(payload, correctionNote = "") {
 {
   "reflection": "string",
   "cardReadings": [
-    { "position": "string", "card": "string", "message": "string" }
+    { "position": "string", "card": "string", "tags": ["string", "string", "string"], "message": "string" },
+    { "position": "string", "card": "string", "tags": ["string", "string", "string"], "message": "string" },
+    { "position": "string", "card": "string", "tags": ["string", "string", "string"], "message": "string" }
   ],
   "combined": "string",
   "gentleReminder": "string",
@@ -579,69 +630,58 @@ function buildPrompt(payload, correctionNote = "") {
   ].join("\n");
 }
 
-function extractJsonText(result) {
-  const text = result?.candidates?.[0]?.content?.parts?.map((part) => part.text ?? "").join("") ?? "";
-  return text.trim();
-}
+async function requestAiCandidate(payload, correctionNote = "") {
+  const options = { temperature: payload.mode === "daily" ? 0.4 : 0.55 };
+  let result;
 
-function parseReadingJson(raw) {
-  const trimmed = raw.trim();
-  const withoutFence = trimmed.replace(/^```json\s*|\s*```$/g, "").trim();
-  return JSON.parse(withoutFence);
-}
+  try {
+    result = await requestJson(buildPrompt(payload, correctionNote), options);
+  } catch (error) {
+    if (error?.code !== "AI_JSON_PARSE") throw error;
 
-async function requestGeminiCandidate(payload, correctionNote = "") {
-  const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
-  const model = process.env.GEMINI_MODEL || "gemini-2.5-flash";
-
-  if (!apiKey) {
-    return buildFallbackReading(payload);
+    result = await requestJson(
+      buildPrompt(
+        payload,
+        "The previous response was invalid JSON. Retry the same semantic task. Return one complete valid JSON object only, with no Markdown, no commentary, and all required fields.",
+      ),
+      options,
+    );
   }
 
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        contents: [
-          {
-            role: "user",
-            parts: [{ text: buildPrompt(payload, correctionNote) }],
-          },
-        ],
-        generationConfig: {
-          responseMimeType: "application/json",
-          temperature: payload.mode === "daily" ? 0.4 : 0.55,
-        },
-      }),
-    },
-  );
-
-  const result = await response.json().catch(() => null);
-  if (!response.ok || !result) {
-    throw new Error(result?.error?.message ?? "Gemini reading failed");
+  if (!result.value) {
+    return { provider: result.provider, value: buildFallbackReading(payload) };
   }
 
-  return parseReadingJson(extractJsonText(result));
+  return result;
 }
 
-async function requestGeminiReading(payload) {
+async function requestReading(payload) {
   if (shouldUseLocalContent(payload.mode)) {
     return buildFallbackReading(payload);
   }
 
-  const parsed = await requestGeminiCandidate(payload);
+  const { value: parsed, provider } = await requestAiCandidate(payload);
+
+  if (payload.mode === "daily") {
+    const dailyReading = shapeDailyReading({ ...parsed, provider });
+    validateDailyReadingCandidate(dailyReading, payload);
+    return dailyReading;
+  }
+
+  validateQuestionReadingCandidate(parsed, payload);
 
   return shapeQuestionReading({
     reflection: String(parsed.reflection ?? ""),
-    cardReadings: Array.isArray(parsed.cardReadings) ? parsed.cardReadings : [],
+    cardReadings: parsed.cardReadings.map((item, index) => ({
+      position: payload.cards[index].position,
+      card: payload.cards[index].name,
+      tags: item.tags,
+      message: item.message,
+    })),
     combined: String(parsed.combined ?? ""),
     gentleReminder: String(parsed.gentleReminder ?? ""),
     followUps: Array.isArray(parsed.followUps) ? parsed.followUps.slice(0, 3) : [],
-    provider: "gemini",
+    provider,
   });
 }
 
@@ -665,7 +705,7 @@ module.exports = async (req, res) => {
     ? body.cards.map((card, index) => ({
         position: String(card?.position ?? positions[index] ?? `Card ${index + 1}`),
         name: String(card?.name ?? `Card ${index + 1}`),
-        meaning: String(card?.meaning ?? ""),
+        ...(mode === "daily" ? { meaning: String(card?.meaning ?? "") } : {}),
       }))
     : [];
 
@@ -674,7 +714,7 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const reading = await requestGeminiReading({
+    const reading = await requestReading({
       question,
       mode,
       spreadTitle,

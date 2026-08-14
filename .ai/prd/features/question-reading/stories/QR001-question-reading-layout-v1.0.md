@@ -291,3 +291,11 @@ related_prd_feature: "../index.md"
 - Codex：Question Reading 改为复用共享 `ReminderNote.vue`，移除本页所有 Reminder 卡片专属背景、边框、圆角、padding、字体和光效样式；Daily Reading 的共享样式作为唯一来源。
 - 用户：要求 Daily Reading 与 Question Reading 的 `Back to Home` 统一为更圆润的 secondary pill。
 - Codex：将 Question Reading CTA 统一为 `190px × 42px`、`21px` 圆角，保留原有颜色、字号和回首页行为。
+- 用户：已获取 DeepSeek API key，希望将项目 AI provider 从 Gemini 切换为 DeepSeek。
+- Codex：新增 `api/_ai-provider.js` 统一适配 Gemini 与 DeepSeek；通过 `AI_PROVIDER=deepseek` 切换，`/api/spread` 与 `/api/reading` 共享同一 provider，保留原 JSON schema、本地牌名/牌图绑定和 fallback 行为。
+- 用户：要求重构 Question Reading 的 DeepSeek prompt；动态 chips、三张牌正文、Three-Card Insight、Bigger Picture 和 Reminder 必须在一次请求中生成，并移除旧的 love / generic tarot prompt 偏置。
+- Codex：将问题解牌的动态内容合并到一次 `/api/reading` 请求，移除请求 payload 中的 `loveMeaning`，新增每张卡片 3 个 1-2 词 chips 的 JSON 校验，并在 JSON 解析失败时按同一语义重试一次；固定牌位与牌名仍由本地绑定。
+- 用户：反馈顶部 Three-Card Insight 正文过长，要求移动端两行内完整显示且不能出现省略号；下方卡片、Bigger Picture 与 Reminder 的正文长度保持不变。
+- Codex：让 DeepSeek 在同一次 JSON 请求中单独返回 12–18 词的 `reflection`，前端优先展示该字段并移除 Insight 的 CSS 两行省略截断；补充空 Insight 校验和本地短 fallback。
+- 用户：反馈问题解牌页前三张 Section 的正文行距过小，影响手机端阅读。
+- Codex：仅将前三张 Section 正文的 line-height 从 `1.14` 调整为 `1.42`，不改变字体大小、文案、卡片结构或其他区域样式。

@@ -1,5 +1,5 @@
 ---
-title: "功能模块 PRD：Gemini 解读 API"
+title: "功能模块 PRD：AI 解读 API"
 version: "1.0.0"
 feature_id: "gemini-reading-api"
 last_updated: "2026-08-12"
@@ -9,7 +9,7 @@ status: "草稿"
 
 ## 1. 目的
 
-Gemini 解读 API 通过 Vercel Serverless Function，为每日陪伴和问题解牌生成结构化内容。
+AI 解读 API 通过 Vercel Serverless Function，为每日陪伴和问题解牌生成结构化内容。
 
 ## 2. 目标
 
@@ -42,11 +42,11 @@ Gemini 解读 API 通过 Vercel Serverless Function，为每日陪伴和问题�
 ## 5. 技术考量
 
 - 环境变量：
-  - `GEMINI_API_KEY`
-  - `GOOGLE_API_KEY`
-  - `GEMINI_MODEL`
+  - `AI_PROVIDER`：`gemini` 或 `deepseek`，默认 `gemini`
+  - Gemini：`GEMINI_API_KEY`、`GOOGLE_API_KEY`、`GEMINI_MODEL`
+  - DeepSeek：`DEEPSEEK_API_KEY`、`DEEPSEEK_MODEL`
   - `READING_CONTENT_SOURCE`
-- 默认模型：`gemini-2.5-flash`
+- 默认模型：Gemini 使用 `gemini-2.5-flash`，DeepSeek 使用 `deepseek-chat`
 - 返回类型：
   - `daily`
   - `question`
@@ -60,6 +60,7 @@ Gemini 解读 API 通过 Vercel Serverless Function，为每日陪伴和问题�
 - `READING_CONTENT_SOURCE` 取值：
   - `local`：`api/spread.js` 与 `api/reading.js` 全部返回本地 fallback。
   - `gemini`：`api/spread.js` 与 `api/reading.js` 全部优先请求 Gemini，失败时再回退到本地 fallback。
+  - 当 `READING_CONTENT_SOURCE` 为 `gemini` 且 `AI_PROVIDER=deepseek` 时，`api/spread.js` 与 `api/reading.js` 优先请求 DeepSeek，失败时再回退到本地 fallback；返回 JSON schema 与 Gemini 保持一致。
 
 问题解牌 JSON：
 

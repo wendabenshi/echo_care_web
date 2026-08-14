@@ -2,7 +2,7 @@
 title: "功能模块 PRD：问题解牌"
 version: "1.0.0"
 feature_id: "question-reading"
-last_updated: "2026-08-12"
+last_updated: "2026-08-14"
 owner: "Wenzerong / Codex"
 status: "草稿"
 ---
@@ -83,7 +83,7 @@ A Gentle Reminder
 
 - 红框内的页面骨架文案（`Your Question`、顶部三个牌位标签、`Your Three-Card Insight`、三个详细 Section label、`The Bigger Picture`、`A Gentle Reminder`）由前端本地固定，保证 UI 结构稳定。
 - 用户问题、牌名和牌图始终由本地流程抽取并绑定。
-- 红框以外的动态内容（spread 胶囊标签、Three-Card Insight 正文、三个卡片正文、Bigger Picture 正文、Reminder 正文）通过 Gemini 返回。
+- 红框以外的动态内容（Three-Card Insight 正文、每张卡片的 3 个动态 chips、三个卡片正文、Bigger Picture 正文、Reminder 正文）由一次 AI 请求返回。
 - 当前本地调试环境通过 `QUESTION_READING_CONTENT_SOURCE="gemini"` 仅将 Question Reading 的动态内容切换为 Gemini；Daily Reading 继续使用 `READING_CONTENT_SOURCE="local"`。
 - 服务：`src/services/drawSession.js`
 - 埋点：`reading_completed`，mode 为 `love-energy`
@@ -98,11 +98,15 @@ A Gentle Reminder
 - `gentleReminder` 应是陪伴式收尾，而不是继续解释牌。
 - 临时调试策略：在问题解牌页 UI / 布局优化阶段，Question Reading 服务端逻辑可临时固定为 fallback-only，不请求 Gemini，避免配额、延迟和输出波动干扰样式验收。
 - 为兼容历史调用，若问题解牌请求未显式传入 `mode`，服务端仍应基于三张牌请求识别为问题解牌流程，并套用相同的临时 fallback 策略。
-- 当前视觉调试阶段，Question Reading 的牌背统一使用本地 `Mystic Editorial` 牌背图；三张结果牌与结果页 Hero 应展示与真实抽中牌名一致的本地卡面图，且当前网页抽牌牌池限制为 22 张大阿卡纳。
+- 当前视觉调试阶段，Question Reading 的牌背统一使用本地 `Mystic Editorial` 牌背图；三张结果牌与结果页 Hero 应展示与真实抽中牌名一致的本地卡面图，且当前网页抽牌牌池已扩展为本地完整 78 张塔罗牌（22 张大阿卡纳 + 56 张小阿卡纳）。
 - 当前统一规则：牌名与牌图始终由本地抽牌逻辑生成并绑定，不依赖 Gemini。`牌阵标题 / 位置文案 / 解读内容` 必须使用同一个内容源，不允许混搭。
+- 问题解牌翻牌完成后只发起一次 `/api/reading` 请求；不再通过 `/api/spread` 单独生成 chips 或牌阵文案。
+- `/api/reading` 的问题解牌响应必须包含 3 个 `cardReadings`，每个包含 3 个动态 chips；chips 基于用户问题、当前牌名和当前牌位生成。
+- `reflection` 作为顶部 `Your Three-Card Insight` 的独立短句返回，控制在 12–18 个英文词内，确保移动端两行内完整显示且不出现省略号；不得复用 Bigger Picture 正文首句。
 - 共享内容源由环境变量 `READING_CONTENT_SOURCE` 控制：
   - `local`：`/api/spread` 与 `/api/reading` 都返回本地 fallback。
   - `gemini`：`/api/spread` 与 `/api/reading` 都优先请求 Gemini，失败时再分别回退到本地 fallback。
+  - 当内容源为 `gemini` 且 `AI_PROVIDER=deepseek` 时，`/api/spread` 与 `/api/reading` 都优先请求 DeepSeek，失败时再分别回退到本地 fallback；牌名和牌图仍由本地抽牌逻辑绑定。
 
 ## 8. 待解决问题
 
