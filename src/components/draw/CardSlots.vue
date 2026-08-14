@@ -57,12 +57,18 @@ const props = defineProps({
   flipped: { type: Array, default: () => [false, false, false] },
 });
 
+const positionLabels = [
+  "The Situation",
+  "What’s Shaping It",
+  "What To Consider",
+];
+
 function isFilled(index) {
   return props.pickedCount > index;
 }
 
 function positionLabel(index) {
-  return props.draw?.position_meanings?.[index] ?? "";
+  return positionLabels[index] ?? "";
 }
 
 function cardLabel(index) {

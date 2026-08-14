@@ -167,6 +167,20 @@ related_prd_feature: "../index.md"
 - 2026-08-10 00:00 - Codex：继续修正问题解牌页结果页第一屏的卡图与下方文字居中关系；在保留整行顶部对齐的前提下，撤回 Hero 结果牌上的 `self-start`，改回由列容器统一居中，让图片与牌名 / 位置文案重新回到同一垂直中心线。同时临时将问题抽牌池限制为已有本地图片资产的牌，避免牌名落到尚未生成图片的牌上。
 - 2026-08-12 00:00 - Codex：将问题解牌页的“牌阵标题 / 位置文案 / 解读内容”统一纳入共享 `READING_CONTENT_SOURCE` 规则，不再允许 `spread` 与 `reading` 分别切换来源；牌名与牌图继续保持本地抽牌和本地资源绑定。
 
+- 2026-08-14 00:00 - Codex：与 Daily Reading 共用同一套深黑紫 ambient Reading 背景，降低星点与云雾噪音并加入克制的环境渐变和暗角；不改变 Question Reading 的内容结构、卡片、字体、布局与交互。
+
+- 2026-08-14 00:00 - Codex：Question Reading 继续复用共享 `ReminderNote`，仅同步其深色圆角背景与低饱和环境光；不新增 Question Reading 专属 Reminder 样式。
+
+- 2026-08-14 00:00 - Codex：回退上一轮 Question Reading 页面级背景优化，恢复原始背景视觉；共享 `ReminderNote` 的组件内背景保持不变。
+
+- 2026-08-14 00:00 - Codex：Question Reading 复用共享 Reminder 的内部 ambient light ribbon，不新增页面专属动画或背景效果；支持 `prefers-reduced-motion`。
+
+- 2026-08-14 00:00 - Codex：同步提高共享 Reminder 内部光带亮度，Question Reading 不增加页面专属样式。
+
+- 2026-08-14 00:00 - Codex：将 Question Reading 切换为“固定 UI 文案本地、动态解读内容 Gemini”的来源规则；保留红框内标题与 Section label 本地固定，胶囊标签、Insight、三张卡正文、Bigger Picture 和 Reminder 改由 Gemini 返回，牌名与牌图继续本地绑定。
+
+- 2026-08-14 00:00 - Codex：将来源开关细化为 Question Reading 专属 `QUESTION_READING_CONTENT_SOURCE="gemini"`，避免切换问题解牌页时意外改变 Daily Reading；Question Reading 的牌名和牌图仍由本地流程绑定。
+
 ## 8. AI 交互日志
 
 - 用户：希望为问题抽解牌页单独创建用户故事，用于后续页面优化。
@@ -263,3 +277,17 @@ related_prd_feature: "../index.md"
 - Codex：实现共享内容源开关 `READING_CONTENT_SOURCE`，让 Question Reading 的 `api/spread` 与 `api/reading` 保持同源切换；本地调试默认值保持 `local`。
 - 用户：说明当前更明显的问题是发送问题后，牌框和下方牌出现前等待太久，导致页面中间空了一大段时间。
 - Codex：改为提交后立即使用本地同步抽出的三张牌渲染牌框和牌组，把 `/api/spread` 变成后台补全文案的异步步骤，不再阻塞首屏出现。
+- 用户：要求移除问题解牌抽牌页红框中的 `or receive today's companion` 辅助入口文案。
+- Codex：删除该辅助按钮及其折叠容器，保留问题输入、示例问题和抽牌流程不变。
+- 用户：要求将问题抽牌输入页从 Love Energy / 爱情专属入口调整为通用 Question Reading 入口，保持暗色背景与既有流程。
+- Codex：更新入口标题、辅助文案、placeholder、发送按钮和推荐问题；发送按钮改为仅保留图标的小圆按钮，新增无容器的 `Not sure what to ask? / Today's Companion →` secondary path，并保留原发送、示例问题与每日入口行为。
+- 用户：要求进入三张牌抽取阶段后只调整文字，不改变 UI 样式、位置、卡牌尺寸和交互；采用极简的通用牌位文案。
+- Codex：提交后将顶部文案切换为 `THREE-CARD REFLECTION / Choose three cards. / Tap one card at a time.`，三个牌位固定显示 `THE SITUATION`、`WHAT'S SHAPING IT`、`WHAT TO CONSIDER`，输入阶段文案保持不变。
+- 用户：要求顶部牌位与下方详细解读使用对应但不重复的文字层级。
+- Codex：顶部固定使用 `THE SITUATION`、`WHAT'S SHAPING IT`、`WHAT TO CONSIDER`；下方三个详细 Section 改为 `WHERE THINGS STAND`、`WHAT MAY BE AFFECTING THIS`、`WHAT TO KEEP IN MIND`，牌名和 UI 保持不变。
+- 用户：要求只优化 Question Reading 结果页最后一屏的 UI 层级，不修改任何文案内容或数据逻辑。
+- Codex：保留 Bigger Picture 为唯一主卡片，降低 Reminder 卡片的背景、边框和光效强度，并将 Back to Home 改为轻量次级导航；分别设置详细卡片到总结、总结到 Reminder、Reminder 到按钮的独立间距，并保留底部 safe-area。
+- 用户：要求 Daily Reading 与 Question Reading 的 Reminder 使用同一个共享视觉组件，内容可不同但样式必须完全一致。
+- Codex：Question Reading 改为复用共享 `ReminderNote.vue`，移除本页所有 Reminder 卡片专属背景、边框、圆角、padding、字体和光效样式；Daily Reading 的共享样式作为唯一来源。
+- 用户：要求 Daily Reading 与 Question Reading 的 `Back to Home` 统一为更圆润的 secondary pill。
+- Codex：将 Question Reading CTA 统一为 `190px × 42px`、`21px` 圆角，保留原有颜色、字号和回首页行为。

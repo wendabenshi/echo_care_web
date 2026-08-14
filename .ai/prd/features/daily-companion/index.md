@@ -53,7 +53,7 @@ status: "草稿"
 - 推荐结果页结构：
   - Card Hero
   - Core Insight
-  - Glance Row：`TODAY / YOUR HEART / GENTLE STEP`
+  - Glance Row：`TODAY / YOU / TRY`
   - Reading Sections：
     - `WHAT THIS CARD REFLECTS`
     - `WHERE YOU MAY BE NOW`

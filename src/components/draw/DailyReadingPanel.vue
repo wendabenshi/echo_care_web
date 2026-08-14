@@ -15,7 +15,7 @@
       />
 
       <div class="relative z-10 h-full overflow-y-auto">
-        <div class="mx-auto flex min-h-full w-full max-w-[430px] flex-col px-6 pb-12 pt-[max(1.35rem,env(safe-area-inset-top,0px)+0.95rem)] md:px-8 md:pb-14 md:pt-10">
+        <div class="bottom-section mx-auto flex min-h-full w-full max-w-[430px] flex-col px-6 pb-0 pt-[max(1.35rem,env(safe-area-inset-top,0px)+0.95rem)] md:px-8 md:pt-10">
           <p class="font-woomoo-ui pl-0.5 text-[9px] font-medium uppercase tracking-[0.36em] text-[#8B80DF]/66">
             {{ readingLabel }}
           </p>
@@ -123,15 +123,7 @@
                 </p>
               </section>
 
-              <section
-                v-if="gentleReminderText"
-                class="gentle-guidance-card mt-6 w-full max-w-[23rem]"
-              >
-                <p class="gentle-guidance-label font-woomoo-ui">✦ A Gentle Reminder ✦</p>
-                <p class="gentle-guidance-copy font-woomoo-serif">
-                  {{ gentleReminderText }}
-                </p>
-              </section>
+              <ReminderNote v-if="gentleReminderText" :text="gentleReminderText" />
 
               <div v-if="!hasStructuredReading" class="mx-auto w-full max-w-[320px] text-center">
                 <p
@@ -145,7 +137,7 @@
               </div>
             </div>
 
-            <div class="mt-12 flex w-full max-w-[320px] flex-col items-center self-center md:mt-16">
+            <div class="mt-0 flex w-full max-w-[390px] flex-col items-center self-center">
               <button
                 type="button"
                 class="reading-home-cta"
@@ -166,6 +158,7 @@
 import { computed, onBeforeUnmount, watch } from "vue";
 import StarfieldBackground from "../StarfieldBackground.vue";
 import TarotCardFace from "./TarotCardFace.vue";
+import ReminderNote from "./ReminderNote.vue";
 import { getDailyGlanceCopy } from "../../data/tarotCards.js";
 
 const props = defineProps({
@@ -327,11 +320,11 @@ const glanceItems = computed(() =>
       value: dailyGlanceCopy.value.today,
     },
     {
-      label: "Your Heart",
+      label: "You",
       value: dailyGlanceCopy.value.heart,
     },
     {
-      label: "Gentle Step",
+      label: "Try",
       value: dailyGlanceCopy.value.step,
     },
   ].filter((item) => item.value),
@@ -341,16 +334,16 @@ const readingSections = computed(() =>
   [
     {
       key: "reflect",
-      label: "What This Card Reflects",
-      title: "Tarot Symbolism Today",
+      label: "The Card",
+      title: "What It Could Mean Today",
       iconClass: "is-heart",
       imageSrc: "/section-art/daily-reflect-orb.png",
       body: reflectText.value,
     },
     {
       key: "where",
-      label: "Where You May Be Now",
-      title: "A Real-Life Mirror",
+      label: "Real Life",
+      title: "Where You Might Recognize It",
       iconClass: "is-stairs",
       imageSrc: "/section-art/daily-where-orb.png",
       body: whereNowText.value,
@@ -358,7 +351,7 @@ const readingSections = computed(() =>
     {
       key: "shift",
       label: "One Small Shift",
-      title: "A Gentle Next Move",
+      title: "Something To Try Today",
       iconClass: "is-ribbon",
       imageSrc: "/section-art/daily-shift-orb.png",
       body: smallShiftText.value,
@@ -464,11 +457,7 @@ onBeforeUnmount(() => {
 
 .reading-section-image--where {
   width: 5.38rem;
-  filter:
-    drop-shadow(0 14px 34px rgba(135, 118, 242, 0.3))
-    brightness(1.22)
-    saturate(1.08)
-    contrast(1.02);
+  filter: drop-shadow(0 12px 28px rgba(135, 118, 242, 0.24));
 }
 
 .reading-section-icon-orb {
@@ -511,151 +500,74 @@ onBeforeUnmount(() => {
 .reading-section-label {
   font-size: 0.68rem;
   line-height: 1.3;
-  letter-spacing: 0.38em;
+  letter-spacing: 0.25em;
   text-transform: uppercase;
-  color: rgba(223, 217, 235, 0.54);
+  color: rgba(255, 255, 255, 0.52);
 }
 
 .reading-section-title {
   margin-top: 0.48rem;
   font-size: 1.2rem;
   line-height: 1.22;
-  font-weight: 560;
+  font-weight: 500;
   letter-spacing: -0.01em;
-  color: rgba(255, 255, 255, 0.88);
+  color: rgba(255, 255, 255, 0.94);
 }
 
 .reading-section-body {
-  margin: 0.72rem auto 0;
+  margin: 0.42rem auto 0;
   max-width: 21.3rem;
   font-size: 0.94rem;
-  line-height: 1.78;
+  line-height: 1.7;
   text-align: center;
-  color: rgba(255, 255, 255, 0.72);
-}
-
-.gentle-guidance-card {
-  position: relative;
-  overflow: hidden;
-  padding: 30px 24px 28px;
-  border-radius: 30px;
-  border: 1px solid rgba(214, 198, 255, 0.08);
-  background:
-    radial-gradient(circle at 17% 84%, rgba(88, 39, 161, 0.22), transparent 26%),
-    radial-gradient(circle at 84% 86%, rgba(103, 160, 255, 0.22), transparent 24%),
-    linear-gradient(128deg, rgba(14, 13, 21, 0.985) 0%, rgba(19, 17, 28, 0.98) 22%, rgba(32, 22, 50, 0.96) 50%, rgba(57, 38, 97, 0.9) 76%, rgba(57, 97, 168, 0.82) 100%);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.035),
-    0 18px 44px rgba(8, 7, 16, 0.24);
-}
-
-.gentle-guidance-card::before {
-  content: "";
-  position: absolute;
-  inset: -18% -10%;
-  background:
-    radial-gradient(circle at 56% 46%, rgba(255, 255, 255, 0.08), transparent 18%),
-    linear-gradient(125deg, transparent 22%, rgba(166, 206, 255, 0.16) 46%, rgba(208, 138, 255, 0.14) 61%, transparent 79%);
-  opacity: 0.92;
-  filter: blur(32px);
-  pointer-events: none;
-}
-
-.gentle-guidance-card::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(circle at 50% 50%, transparent 48%, rgba(8, 8, 14, 0.18) 100%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.012), rgba(255, 255, 255, 0));
-  pointer-events: none;
-}
-
-.gentle-guidance-label {
-  position: relative;
-  z-index: 1;
-  text-align: center;
-  font-size: 10px;
-  line-height: 1.2;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-  color: rgba(228, 216, 255, 0.76);
-}
-
-.gentle-guidance-copy {
-  position: relative;
-  z-index: 1;
-  max-width: 15.8rem;
-  min-height: calc(1.78em * 3.3);
-  margin: 20px auto 0;
-  font-family: "Lora", Georgia, "Times New Roman", serif;
-  font-size: 0.92rem;
-  font-weight: 400;
-  font-style: normal;
-  line-height: 1.78;
-  letter-spacing: 0.002em;
-  text-align: center;
-  color: rgba(245, 241, 250, 0.9);
-  text-wrap: pretty;
+  color: rgba(255, 255, 255, 0.75);
 }
 
 .reading-home-cta {
   position: relative;
   display: flex;
-  width: 100%;
+  width: 190px;
+  min-width: 190px;
+  height: 42px;
+  min-height: 42px;
+  margin: 38px auto 0;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
-  overflow: hidden;
-  border-radius: 999px;
-  border: 1px solid rgba(192, 170, 255, 0.12);
-  background:
-    radial-gradient(circle at 18% 50%, rgba(94, 54, 180, 0.18), transparent 30%),
-    radial-gradient(circle at 82% 50%, rgba(95, 132, 255, 0.16), transparent 28%),
-    linear-gradient(135deg, rgba(26, 23, 35, 0.98) 0%, rgba(45, 31, 72, 0.96) 52%, rgba(40, 58, 102, 0.94) 100%);
-  padding: 0.95rem 1.1rem;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.045),
-    0 14px 34px rgba(7, 6, 14, 0.22);
+  gap: 6px;
+  border-radius: 21px;
+  border: 1px solid rgba(255, 255, 255, 0.065);
+  background: rgba(255, 255, 255, 0.025);
+  padding: 0 20px;
   transition:
     transform 180ms ease,
     border-color 180ms ease,
-    box-shadow 180ms ease,
     background 180ms ease;
 }
 
 .reading-home-cta:hover {
-  border-color: rgba(206, 188, 255, 0.18);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.055),
-    0 18px 40px rgba(7, 6, 14, 0.26);
+  border-color: rgba(255, 255, 255, 0.11);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .reading-home-cta:active {
-  transform: scale(0.992);
+  transform: scale(0.985);
+  background: rgba(255, 255, 255, 0.07);
 }
 
 .reading-home-cta-label {
-  font-size: 1rem;
+  font-size: 14px;
   font-weight: 500;
   line-height: 1;
-  letter-spacing: 0.01em;
-  color: rgba(248, 244, 255, 0.94);
+  letter-spacing: -0.01em;
+  color: rgba(248, 246, 250, 0.78);
 }
 
 .reading-home-cta-arrow {
-  display: inline-flex;
-  height: 2.1rem;
-  width: 2.1rem;
-  align-items: center;
-  justify-content: center;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.04);
-  font-size: 1.15rem;
+  display: inline-block;
+  margin-left: 0;
+  font-size: 16px;
   line-height: 1;
-  color: rgba(255, 255, 255, 0.88);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.62);
 }
 
 .icon-heart,
@@ -747,31 +659,17 @@ onBeforeUnmount(() => {
 }
 
 @media (min-width: 768px) {
-  .gentle-guidance-card {
-    padding: 34px 34px 32px;
-    border-radius: 32px;
-  }
-
-  .gentle-guidance-copy {
-    max-width: 18.5rem;
-    margin-top: 20px;
-    min-height: calc(1.82em * 3.2);
-    font-size: 0.98rem;
-    line-height: 1.82;
-  }
-
   .reading-home-cta {
-    padding: 1rem 1.3rem;
+    height: 42px;
+    min-height: 42px;
   }
 
   .reading-home-cta-label {
-    font-size: 1.08rem;
+    font-size: 14px;
   }
+}
 
-  .reading-home-cta-arrow {
-    height: 2.2rem;
-    width: 2.2rem;
-    font-size: 1.18rem;
-  }
+.bottom-section {
+  padding-bottom: calc(30px + env(safe-area-inset-bottom));
 }
 </style>

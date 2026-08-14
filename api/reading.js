@@ -629,7 +629,7 @@ async function requestGeminiCandidate(payload, correctionNote = "") {
 }
 
 async function requestGeminiReading(payload) {
-  if (shouldUseLocalContent()) {
+  if (shouldUseLocalContent(payload.mode)) {
     return buildFallbackReading(payload);
   }
 

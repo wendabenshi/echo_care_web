@@ -20,7 +20,7 @@ related_prd_feature: "../index.md"
 
 - [ ] AC 1：每日抽牌页第一屏行动清晰，用户知道应该抽一张今日牌。
 - [ ] AC 2：每日解牌结果页采用“Card Hero + Core Insight + Glance Row + 3 个主阅读 Section + A Gentle Reminder”的结构。
-- [ ] AC 3：Hero 下方使用无边框三列 `TODAY / YOUR HEART / GENTLE STEP` 作为快速预览，而不是按钮式摘要卡。
+- [ ] AC 3：Hero 下方使用无边框三列 `TODAY / YOU / TRY` 作为快速预览，而不是按钮式摘要卡。
 - [ ] AC 4：三个主阅读 Section 使用统一 glass card，内容分别承载 `WHAT THIS CARD REFLECTS`、`WHERE YOU MAY BE NOW`、`ONE SMALL SHIFT`。
 - [ ] AC 5：视觉保持黑紫色高级感，但页面整体更安静、更像 Tarot Journal / emotional companion，而不是传统占卜工具。
 
@@ -78,7 +78,7 @@ related_prd_feature: "../index.md"
   - `sections.where_you_may_be_now`：50-70 词，且必须包含至少一个具体现实场景
   - `sections.one_small_shift`：30-45 词
   - `sections.gentle_reminder`：15-25 词
-- Hero 下方的 `TODAY / YOUR HEART / GENTLE STEP` 不由 AI 自由生成，改为从本地塔罗牌数据读取固定短语，确保不重复、不空泛、且与牌义相关。
+- Hero 下方的 `TODAY / YOU / TRY` 不由 AI 自由生成，改为从本地塔罗牌数据读取固定短语，确保不重复、不空泛、且与牌义相关。
 - 服务端会对 Daily Reading 增加输出守卫：
   - 若 Gemini 结果出现旧模板禁用词，则拒绝该结果并回退到 grounded fallback。
   - `WHERE YOU MAY BE NOW` 若缺少现实生活场景，也会触发回退。
@@ -166,6 +166,21 @@ related_prd_feature: "../index.md"
 - 2026-08-13 00:00 - Codex：继续根据用户反馈，再次将每日解牌页各 section 之间的垂直间距额外压缩约 10px，进一步收紧长页面的阅读节奏。
 - 2026-08-13 00:00 - Codex：根据用户截图反馈，将第一个 section 与上方 Glance Row 之间的起始留白额外压缩约 15px，不改变各 section 内部结构，仅收紧首个 section 入场位置。
 - 2026-08-13 00:00 - Codex：排查正式环境第 2 个 daily section icon 未显示的问题，确认资源文件、生产路径与打包引用均正常；因此转为修正真机可见性，单独提高 `daily-where-orb` 的亮度、对比度和显示尺寸，避免在深色背景下视觉上“消失”。
+- 2026-08-13 00:00 - Codex：进一步确认第 2 个 daily section icon 的真机异常来自 PNG 自身残留的半透明暗底，而不是页面额外背景；已重新清理 `daily-where-orb` 资源的暗色残底，避免手机端出现矩形脏底。
+- 2026-08-14 00:00 - Codex：根据用户最新文案方向，继续把每日抽牌页第一屏语气从“问询式”收束为更安静的 moment framing；将 Hero 标题改为 `A moment for today.`，副标题改为 `See what today’s card brings into focus.`。
+- 2026-08-14 00:00 - Codex：继续收轻每日抽牌页卡牌下方的状态提示，移除 `Listening... / Revealing...` 动态字样，仅保留一行极小的固定引导 `Tap to draw`，颜色压到 `rgba(255,255,255,.45)`，减少首屏杂讯。
+- 2026-08-14 00:00 - Codex：继续压缩每日解牌页 Hero 下三列标签的语言负担，将 `TODAY / YOUR HEART / GENTLE STEP` 改为更短的 `TODAY / YOU / TRY`，保持原有本地短语值和版式不变，只调整标题标签文案。
+- 2026-08-14 00:00 - Codex：根据用户提供的新本地文案批次，整体替换 `DAILY_GLANCE_COPY`，从原先只覆盖部分牌、偏抽象的短语，升级为覆盖四个花色与大阿卡纳的完整本地 tip 映射，并统一为更生活化、更具体的表达。
+
+- 2026-08-14 00:00 - Codex：将 Daily Reading 与 Question Reading 的共享 Reading 背景收敛为深黑紫 ambient background：降低移动端星点数量与透明度、降低云雾层强度、加入低透明度多层环境渐变和轻微暗角；不改变文案、卡片、字体、布局与交互。
+
+- 2026-08-14 00:00 - Codex：仅调整共享 `ReminderNote` 的自身背景，将 Reminder 恢复为深色圆角 signature card，并加入低饱和紫灰环境光；页面背景、星点、正文、Section、按钮、文案与间距保持不变。
+
+- 2026-08-14 00:00 - Codex：按用户要求回退上一轮 Reading 页面级背景优化，恢复原始底色、星点、云雾、暗角、底部覆盖层与页面叠加层；仅保留共享 `ReminderNote` 的新背景样式。
+
+- 2026-08-14 00:00 - Codex：仅在共享 `ReminderNote` 卡片内部加入低透明度、强模糊、16 秒缓慢往返的 ambient light ribbon；避开正文中心，并在减少动态偏好下关闭动画。
+
+- 2026-08-14 00:00 - Codex：根据反馈仅提高共享 Reminder 内部光带的透明度与柔光强度，保留原有 16 秒漂移、模糊、低饱和和无障碍动效策略。
 
 ## 8. AI 交互日志
 
@@ -197,6 +212,40 @@ related_prd_feature: "../index.md"
 - Codex：缩轻 section icon 的存在感，并同步放松 section 间距与正文节奏，让视觉重心更多回到标题和内容本身。
 - 用户：在正式环境查看时发现每日解牌页第二个 section 的 icon 看起来没有显示。
 - Codex：先核对正式环境资源路径、部署产物和生产包引用，确认不是资源缺失；随后改为直接增强第二个 icon 的真机可见性，通过提亮和微放大修复“看起来消失”的问题。
+- 用户：继续在手机上发现第二个 section icon 周围出现矩形背景。
+- Codex：定位为 `daily-where-orb` 资源自身残留的半透明暗底，而不是 CSS 容器背景；随后直接清理 PNG 残底，保留主体发光图形。
+- 用户：要求把每日抽牌页首屏 `How are you today?` 改为 `A moment for today.`，并把说明文案改为 `See what today’s card brings into focus.`。
+- Codex：直接更新 `DailyCardPage.vue` 的 Hero 文案，并同步记录到 DC001 用户故事日志。
+- 用户：继续要求卡牌下方只保留一行非常小的 `Tap to draw`，颜色使用 `rgba(255,255,255,.45)`。
+- Codex：移除原有 `Listening... / Revealing...` 动态提示，改为固定极小引导文案，并同步更新 DC001 日志。
+- 用户：要求把每日解牌页的 `TODAY / YOUR HEART / GENTLE STEP` 改成 `TODAY / YOU / TRY`。
+- Codex：更新 `DailyReadingPanel.vue` 的三列标签文案，并同步更新 daily companion PRD 与 DC001 用户故事。
+- 用户：提供一整批新的 `DAILY_GLANCE_COPY` 小 tip 文案，希望切换成本地映射版本。
+- Codex：将 `src/data/tarotCards.js` 中的本地 tip 映射整体替换为用户提供的新批次，并同步记录到 DC001 日志。
+- 用户：指出每日解牌页各 section 标题与正文之间的留白偏大，希望缩小截图标示区域。
+- Codex：将三个 Daily Reading section 共用的标题到正文间距从 `0.72rem` 收紧到 `0.42rem`，保持正文行高与 section 之间的间距不变，避免整体布局变挤。
+- 用户：继续要求收紧每日解牌页 section 正文的行高。
+- Codex：将三个 section 正文行高从 `1.78` 调整为 `1.6`，保持字号、正文宽度与 section 间距不变。
+- 用户：指出每日解牌页第二个 section icon 相比另外两个过亮，希望降低亮度并统一视觉表现。
+- Codex：移除第二个 icon 独有的亮度、饱和度和对比度增强，恢复与另外两个 icon 一致的基础阴影滤镜。
+- 用户：要求将每日解牌页三个 section 的标签与副标题调整为参考图中的更直接表达。
+- Codex：保留现有正文与视觉结构，仅将三组标题更新为 `WHAT THIS CARD REFLECTS / What This Card May Point To`、`WHERE THIS MAY SHOW UP / In Your Everyday Life`、`ONE SMALL SHIFT / Something To Try Today`。
+- 用户：继续将每日解牌页 section 标题收短为参考图版本。
+- Codex：将三组标题更新为 `THE CARD / What It Could Mean Today`、`REAL LIFE / Where You Might Recognize It`、`ONE SMALL SHIFT / Something To Try Today`，保留正文、icon 与布局不变。
+- 用户：提供 section 文字样式规范，希望标签、标题和正文更克制且更易读。
+- Codex：将 section 标签字距收至 `0.25em`、颜色设为约 `0.52`；标题使用约 19px、Medium、约 `0.94` 白色；正文保持约 15px，颜色调整为约 `0.75`，行高设为 `1.7`。
+- 用户：提供底部 Reminder Card 与 `Back to Home` 的收尾区域规范，要求降低底部视觉重量，内容文案和点击行为保持不变。
+- Codex：将 Reminder Card 调整为深紫黑半透明轻玻璃卡，移除强蓝紫渐变与光带；正文设为约 18px serif、`1.55` 行高；将 `Back to Home` 改为 52px 高的低对比次级导航按钮，移除独立圆形箭头容器，保留原回首页事件。
+- 用户：要求 Daily Reading 与 Question Reading 使用同一个 Reminder 视觉组件，以 Daily Reading 当前样式作为唯一来源。
+- Codex：新增共享 `ReminderNote.vue`，统一两页 Reminder 的短细线、label、Sans Serif 正文、颜色与间距；移除 Daily Reading 页面内的 Reminder 专属样式定义。
+- 用户：要求 Daily Reading 与 Question Reading 的 `Back to Home` 统一为更圆润的 secondary pill。
+- Codex：将 Daily Reading CTA 统一为 `190px × 42px`、`21px` 圆角，保留原有颜色、字号和回首页行为。
+- 用户：认可底部收尾层级，要求继续进行最后一轮微调，不改变结构和内容。
+- Codex：将 Reminder Card padding 收紧为 `22px 24px 24px`、圆角收至 `20px`，背景改为更灰的深紫色；标题字距收至 `0.19em`；按钮边框和背景进一步减弱、箭头间距收紧，并将 Reminder 到按钮的间距调整为 `46px`。
+- 用户：提供底部区域最终参数，要求继续压低 Reminder 正文与按钮的视觉重量。
+- Codex：按最终规范将 Reminder 调整为 `20px 22px 22px`、`15.5px / 1.55` 正文和更灰的背景；`Back to Home` 调整为 `72%` 宽、最大 `286px`、44px 高、42px 上间距，并补充底部 safe-area 留白。
+- 用户：指出 Reminder 卡片与下方按钮仍形成双 CTA，且 Serif 正文与上方 Sans Serif 阅读体系割裂；要求改为无容器的 Editorial Closing Note。
+- Codex：移除 Reminder 的背景、边框、圆角、阴影和玻璃效果，改为短细线加 Sans Serif 收尾正文；`Back to Home` 改为 42px 高、最小 180px 宽的小型导航 pill，保留原点击回首页行为。
 - 用户：指出 section 中字体仍偏大，希望更接近 Woomoo 的克制感。
 - Codex：进一步收小 section 标签、标题和正文的字号与层级，减少内容块的视觉膨胀感。
 - 用户：给出最终方向，要求只执行两项：采用 `TODAY / YOUR HEART / GENTLE STEP`，并将三列值控制在 1-3 个词。

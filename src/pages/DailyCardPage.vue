@@ -30,11 +30,11 @@
             </p>
 
             <h1 class="font-serif text-2xl font-normal leading-tight text-white sm:text-3xl md:text-4xl">
-              How are you today?
+              A moment for today.
             </h1>
 
             <p class="text-sm font-medium text-white/42 md:text-[0.95rem]">
-              Draw your card for today's energy.
+              See what today’s card brings into focus.
             </p>
 
             <div class="mx-auto flex justify-center pt-5 md:pt-7">
@@ -73,10 +73,10 @@
                 </div>
 
                 <p
-                  class="text-[10px] uppercase tracking-[0.18em] text-white/32 transition-opacity duration-300"
-                  :class="previewLoading ? 'opacity-100' : 'opacity-0'"
+                  class="text-[10px] font-medium tracking-[0.08em] transition-opacity duration-300"
+                  style="color: rgba(255,255,255,.45);"
                 >
-                  {{ previewFlipped ? "Revealing..." : "Listening..." }}
+                  Tap to draw
                 </p>
               </div>
             </div>

@@ -78,6 +78,13 @@ A Gentle Reminder
 - 页面：`src/pages/LoveEnergyPage.vue`
 - 结果组件：`src/components/draw/LoveReadingPanel.vue`
 - API：`api/reading.js`
+
+## 7. 内容来源规则
+
+- 红框内的页面骨架文案（`Your Question`、顶部三个牌位标签、`Your Three-Card Insight`、三个详细 Section label、`The Bigger Picture`、`A Gentle Reminder`）由前端本地固定，保证 UI 结构稳定。
+- 用户问题、牌名和牌图始终由本地流程抽取并绑定。
+- 红框以外的动态内容（spread 胶囊标签、Three-Card Insight 正文、三个卡片正文、Bigger Picture 正文、Reminder 正文）通过 Gemini 返回。
+- 当前本地调试环境通过 `QUESTION_READING_CONTENT_SOURCE="gemini"` 仅将 Question Reading 的动态内容切换为 Gemini；Daily Reading 继续使用 `READING_CONTENT_SOURCE="local"`。
 - 服务：`src/services/drawSession.js`
 - 埋点：`reading_completed`，mode 为 `love-energy`
 

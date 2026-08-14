@@ -24,18 +24,19 @@
           aria-hidden="true"
         />
 
-        <div class="relative z-10 flex min-h-[calc(100dvh-4rem)] flex-col items-center px-4 pt-16 pb-0 md:pt-20">
-          <div class="relative z-20 mx-auto w-full max-w-3xl space-y-4 text-center">
-            <p class="text-[10px] md:text-xs uppercase tracking-[0.2em] text-[#7C74E7]/80">
-              {{ submitted && draw?.spread_name ? draw.spread_name : "Love Energy" }}
+        <div class="relative z-10 flex min-h-[calc(100dvh-4rem)] flex-col items-center px-4 pt-8 pb-0 md:pt-12">
+          <div class="question-entry-content relative z-20 mx-auto w-full max-w-3xl space-y-4 text-center">
+            <p class="question-entry-eyebrow">
+              {{ submitted ? "Three-Card Reflection" : "Ask A Question" }}
             </p>
 
-            <h1 class="font-serif text-2xl font-normal leading-tight text-white sm:text-3xl md:text-4xl">
-              Close your eyes.<br />
-              Bring your question to mind.
+            <h1 class="question-entry-title font-serif">
+              {{ submitted ? "Choose three cards." : "What’s on your mind?" }}
             </h1>
 
-            <p class="mb-10 text-xs text-white/35 md:text-sm">The cards are listening</p>
+            <p class="question-entry-supporting">
+              {{ submitted ? "Tap one card at a time." : "Start with something you’ve been thinking about." }}
+            </p>
 
             <div
               class="draw-collapse"
@@ -48,7 +49,7 @@
                   :submitted="submitted"
                   :submitted-question="submittedQuestion"
                   :show-submitted-question="false"
-                  placeholder="Ask your question to begin"
+                  placeholder="Ask your question..."
                   @submit="onSubmit"
                 />
               </div>
@@ -67,12 +68,12 @@
               :aria-hidden="submitted"
             >
               <div class="overflow-hidden" style="min-height: 0;">
-                <div class="mx-auto flex max-w-2xl flex-wrap items-center justify-center gap-2 pt-1">
+                <div class="question-suggestion-list mx-auto flex max-w-2xl flex-wrap items-center justify-center pt-1">
                   <button
                     v-for="chip in suggestionChips"
                     :key="chip"
                     type="button"
-                    class="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 text-[11px] text-white/55 transition hover:border-white/25 hover:bg-white/[0.06] hover:text-white/85 md:text-xs"
+                    class="question-suggestion-chip"
                     @click="selectChip(chip)"
                   >
                     {{ chip }}
@@ -87,15 +88,15 @@
               :aria-hidden="submitted"
             >
               <div class="overflow-hidden" style="min-height: 0;">
-                <button
-                  type="button"
-                  class="inline-block text-[10px] text-[#7C74E7]/40 transition-colors hover:text-[#7C74E7]/70 md:text-xs"
-                  @click="goToDailyReading"
-                >
-                  or receive today's companion
-                </button>
+                <div class="question-companion-path">
+                  <p>Not sure what to ask?</p>
+                  <button type="button" @click="goToDailyReading">
+                    Today's Companion <span aria-hidden="true">→</span>
+                  </button>
+                </div>
               </div>
             </div>
+
           </div>
 
           <div
@@ -158,9 +159,9 @@ const toastMessage = ref("");
 const router = useRouter();
 
 const suggestionChips = [
-  "Will I find love this year?",
-  "Is he the one?",
-  "When will love come?",
+  "Should I reach out?",
+  "What should I focus on at work?",
+  "Why does this feel stuck?",
 ];
 
 const FAN_INTERACTION_DELAY_MS = 280;
@@ -169,21 +170,13 @@ const picksRemaining = computed(() => Math.max(0, 3 - pickedFanIndices.value.len
 const drawReady = computed(() => submitted.value && Boolean(draw.value));
 
 function getHeroPositionLabel(position = "", index = 0) {
-  const normalized = String(position).replace(/\s+/g, " ").trim().toLowerCase();
-  const mapped = {
-    "your heart today": "Current Readiness",
-    "what’s influencing this": "Necessary Preparation",
-    "what's influencing this": "Necessary Preparation",
-    "where to focus": "Timing And Signs",
-    "my heart's current song": "Current Readiness",
-    "nurturing the path forward": "Necessary Preparation",
-    "the embrace awaiting": "Timing And Signs",
-  };
+  const positionLabels = [
+    "The Situation",
+    "What’s Shaping It",
+    "What To Consider",
+  ];
 
-  if (mapped[normalized]) return mapped[normalized];
-
-  const fallback = ["Current Readiness", "Necessary Preparation", "Timing And Signs"];
-  return fallback[index] ?? position;
+  return positionLabels[index] ?? position;
 }
 
 const readingSlots = computed(() => {
@@ -336,6 +329,77 @@ onBeforeUnmount(() => {
   backface-visibility: hidden;
   will-change: transform;
   contain: paint;
+}
+
+.question-entry-eyebrow {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  color: rgba(170, 155, 235, 0.72);
+}
+
+.question-entry-title {
+  font-size: 26px;
+  font-weight: 400;
+  line-height: 1.2;
+  color: rgba(255, 255, 255, 0.96);
+}
+
+.question-entry-supporting {
+  margin-top: 0.25rem;
+  font-size: 13px;
+  line-height: 1.45;
+  color: rgba(240, 237, 245, 0.52);
+}
+
+.question-suggestion-list {
+  column-gap: 8px;
+  row-gap: 8px;
+}
+
+.question-suggestion-chip {
+  min-height: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.045);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.035);
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.2;
+  color: rgba(240, 237, 245, 0.6);
+  transition: background 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+.question-suggestion-chip:hover {
+  border-color: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.055);
+  color: rgba(240, 237, 245, 0.78);
+}
+
+.question-companion-path {
+  margin-top: 18px;
+  text-align: center;
+}
+
+.question-companion-path p {
+  font-size: 11px;
+  line-height: 1.3;
+  color: rgba(240, 237, 245, 0.4);
+}
+
+.question-companion-path button {
+  margin-top: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: rgba(188, 174, 245, 0.72);
+  transition: color 160ms ease;
+}
+
+.question-companion-path button:hover {
+  color: rgba(210, 200, 255, 0.9);
 }
 
 .question-card-fan-stage--visible {

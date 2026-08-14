@@ -1,27 +1,27 @@
 <template>
-  <div class="relative mx-auto grid w-full max-w-2xl overflow-hidden rounded-full" style="grid-template-columns: 1fr;">
+  <div class="question-input-shell relative mx-auto grid w-full max-w-2xl overflow-hidden rounded-[18px]" style="grid-template-columns: 1fr;">
     <!-- input row -->
     <div
-      class="draw-swap-fast grid grid-cols-[1fr_auto] items-center rounded-full border border-white/20 bg-white/[0.06] pr-1.5 has-[input:focus]:ring-2 has-[input:focus]:ring-white/15"
+      class="question-input-row draw-swap-fast grid grid-cols-[1fr_auto] items-center rounded-[18px] border border-white/[0.12] bg-white/[0.035] pr-1.5 has-[input:focus]:ring-1 has-[input:focus]:ring-white/15"
       :style="inputLayerStyle"
       :aria-hidden="submitted"
     >
       <input
         v-model="localQuestion"
         type="text"
-        class="h-12 w-full bg-transparent pl-5 text-xs text-white placeholder:text-white/30 focus:outline-none md:text-sm"
+        class="question-input h-[50px] w-full bg-transparent pl-5 text-sm text-white/88 placeholder:text-white/38 focus:outline-none"
         :placeholder="placeholder"
         @keydown.enter="submit"
       />
       <button
         type="button"
-        class="shrink-0 flex items-center gap-1.5 rounded-full bg-white/90 px-4 py-2 text-xs font-medium text-[#18161D] transition-all hover:bg-white disabled:bg-white/20 disabled:text-white/40 disabled:cursor-not-allowed disabled:hover:bg-white/20"
+        class="question-send-button flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/[0.08] bg-white/[0.09] text-white/70 transition-all hover:bg-white/[0.14] disabled:bg-white/[0.05] disabled:text-white/25 disabled:cursor-not-allowed disabled:hover:bg-white/[0.05]"
         :disabled="!localQuestion.trim()"
         @click="submit"
       >
         <svg
-          width="14"
-          height="14"
+          width="15"
+          height="15"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
@@ -33,7 +33,6 @@
           <line x1="22" y1="2" x2="11" y2="13" />
           <polygon points="22 2 15 22 11 13 2 9 22 2" />
         </svg>
-        Send
       </button>
     </div>
 
@@ -82,8 +81,7 @@ watch(localQuestion, (value) => {
 const inputLayerStyle = computed(() => ({
   gridArea: "1 / 1",
   backdropFilter: "blur(24px)",
-  boxShadow:
-    "0 0 30px rgba(255,255,255,0.2), 0 0 70px rgba(255,255,255,0.12), 0 0 120px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.15)",
+  boxShadow: "none",
   opacity: props.submitted && hasSubmittedQuestion.value ? 0 : 1,
   transform: props.submitted && hasSubmittedQuestion.value ? "scale(0.98)" : "scale(1)",
   pointerEvents: props.submitted && hasSubmittedQuestion.value ? "none" : "auto",

@@ -10,12 +10,13 @@ function normalizeSource(value) {
   return LOCAL;
 }
 
-function getReadingContentSource() {
-  return normalizeSource(process.env.READING_CONTENT_SOURCE);
+function getReadingContentSource(mode = "") {
+  const modeSource = mode === "love-energy" ? process.env.QUESTION_READING_CONTENT_SOURCE : "";
+  return normalizeSource(modeSource || process.env.READING_CONTENT_SOURCE);
 }
 
-function shouldUseLocalContent() {
-  return getReadingContentSource() === LOCAL;
+function shouldUseLocalContent(mode = "") {
+  return getReadingContentSource(mode) === LOCAL;
 }
 
 module.exports = {

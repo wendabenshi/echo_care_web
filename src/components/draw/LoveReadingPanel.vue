@@ -15,7 +15,7 @@
       />
 
       <div class="relative z-10 h-full overflow-y-auto">
-        <div class="mx-auto flex min-h-full w-full max-w-[430px] flex-col px-4 py-12 md:max-w-[900px] md:px-12 md:py-16">
+        <div class="question-reading-shell mx-auto flex min-h-full w-full max-w-[430px] flex-col px-4 py-12 md:max-w-[900px] md:px-12 md:py-16">
           <div class="text-center">
             <p class="text-[10px] uppercase tracking-[0.28em] text-[rgba(189,176,230,0.82)]">Your Question</p>
 
@@ -92,7 +92,7 @@
               </div>
 
               <section v-if="biggerPictureSection" class="bigger-picture-card max-w-[620px]">
-                <p class="text-[10px] uppercase tracking-[0.24em] text-[#7C74E7]/80">The Bigger Picture</p>
+                <p class="bigger-picture-label">The Bigger Picture</p>
                 <div v-if="cardSections.length" class="bigger-picture-chip-row">
                   <span
                     v-for="section in cardSections"
@@ -114,12 +114,7 @@
                 </p>
               </section>
 
-              <section v-if="gentleReminderSection" class="gentle-guidance-card max-w-[620px]">
-                <p class="gentle-guidance-label">✦ A Gentle Reminder ✦</p>
-                <p class="gentle-guidance-copy">
-                  {{ gentleReminderText }}
-                </p>
-              </section>
+              <ReminderNote v-if="gentleReminderSection" :text="gentleReminderText" />
 
               <div class="pt-0">
                 <button
@@ -153,6 +148,7 @@
 import { computed, onBeforeUnmount, watch } from "vue";
 import StarfieldBackground from "../StarfieldBackground.vue";
 import TarotCardFace from "./TarotCardFace.vue";
+import ReminderNote from "./ReminderNote.vue";
 
 const props = defineProps({
   visible: { type: Boolean, default: false },
@@ -274,9 +270,9 @@ const heroInsight = computed(() => {
 });
 
 const cardSectionLabels = [
-  "Your Heart Today",
-  "What’s Influencing This",
-  "Where To Focus",
+  "Where Things Stand",
+  "What May Be Affecting This",
+  "What To Keep In Mind",
 ];
 
 const cardSections = computed(() =>
@@ -469,70 +465,6 @@ onBeforeUnmount(() => {
   }
 }
 
-.gentle-guidance-card {
-  position: relative;
-  overflow: hidden;
-  padding: 30px 24px 28px;
-  border-radius: 30px;
-  border: 1px solid rgba(214, 198, 255, 0.08);
-  background:
-    radial-gradient(circle at 17% 84%, rgba(88, 39, 161, 0.22), transparent 26%),
-    radial-gradient(circle at 84% 86%, rgba(103, 160, 255, 0.22), transparent 24%),
-    linear-gradient(128deg, rgba(14, 13, 21, 0.985) 0%, rgba(19, 17, 28, 0.98) 22%, rgba(32, 22, 50, 0.96) 50%, rgba(57, 38, 97, 0.9) 76%, rgba(57, 97, 168, 0.82) 100%);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.035),
-    0 18px 44px rgba(8, 7, 16, 0.24);
-}
-
-.gentle-guidance-card::before {
-  content: "";
-  position: absolute;
-  inset: -18% -10%;
-  background:
-    radial-gradient(circle at 56% 46%, rgba(255, 255, 255, 0.08), transparent 18%),
-    linear-gradient(125deg, transparent 22%, rgba(166, 206, 255, 0.16) 46%, rgba(208, 138, 255, 0.14) 61%, transparent 79%);
-  opacity: 0.92;
-  filter: blur(32px);
-  pointer-events: none;
-}
-
-.gentle-guidance-card::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(circle at 50% 50%, transparent 48%, rgba(8, 8, 14, 0.18) 100%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.012), rgba(255, 255, 255, 0));
-  pointer-events: none;
-}
-
-.gentle-guidance-label {
-  position: relative;
-  z-index: 1;
-  text-align: center;
-  font-size: 10px;
-  line-height: 1.2;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-  color: rgba(228, 216, 255, 0.76);
-}
-
-.gentle-guidance-copy {
-  position: relative;
-  z-index: 1;
-  max-width: 494px;
-  margin: 20px auto 0;
-  font-family: "Lora", Georgia, "Times New Roman", serif;
-  font-size: 0.92rem;
-  font-weight: 400;
-  font-style: normal;
-  line-height: 1.78;
-  letter-spacing: 0.002em;
-  text-align: center;
-  color: rgba(245, 241, 250, 0.9);
-  text-wrap: pretty;
-}
-
 @media (min-width: 768px) {
   .bigger-picture-card {
     padding: 42px 20px 40px;
@@ -567,17 +499,6 @@ onBeforeUnmount(() => {
     line-height: 1.6;
   }
 
-  .gentle-guidance-card {
-    padding: 34px 34px 32px;
-    border-radius: 32px;
-  }
-
-  .gentle-guidance-copy {
-    max-width: 556px;
-    margin-top: 20px;
-    font-size: 1.04rem;
-    line-height: 1.82;
-  }
 }
 
 .reading-home-cta {
@@ -654,6 +575,87 @@ onBeforeUnmount(() => {
     width: 2.2rem;
     font-size: 1.18rem;
   }
+}
+
+/* Keep the result page hierarchy light as it approaches the closing actions. */
+.question-reading-shell {
+  padding-bottom: calc(30px + env(safe-area-inset-bottom));
+}
+
+.bigger-picture-card {
+  margin: 52px 16px 0 !important;
+  padding: 24px 20px 26px;
+  border-radius: 22px;
+  background: rgba(45, 39, 59, 0.5);
+  border: 1px solid rgba(190, 170, 225, 0.12);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.035),
+    0 14px 38px rgba(0, 0, 0, 0.14);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.bigger-picture-label {
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(235, 230, 242, 0.58);
+}
+
+.bigger-picture-kicker {
+  font-size: 13px;
+}
+
+.bigger-picture-lead,
+.bigger-picture-supporting {
+  max-width: 100%;
+  font-size: 16px;
+  line-height: 1.58;
+}
+
+.reading-home-cta {
+  width: 190px;
+  max-width: 190px;
+  height: 42px;
+  min-height: 42px;
+  margin: 44px auto 0;
+  gap: 6px;
+  border-radius: 21px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.028);
+  padding: 0 18px;
+  box-shadow: none;
+}
+
+.reading-home-cta:hover {
+  border-color: rgba(255, 255, 255, 0.11);
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: none;
+}
+
+.reading-home-cta:active {
+  transform: scale(0.985);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.reading-home-cta-label {
+  font-size: 14px;
+  color: rgba(248, 246, 250, 0.8);
+}
+
+.reading-home-cta-arrow {
+  display: inline-block;
+  width: auto;
+  height: auto;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  padding: 0;
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.62);
+  box-shadow: none;
 }
 
 .reading-fade-enter-active,

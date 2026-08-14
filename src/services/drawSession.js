@@ -101,7 +101,10 @@ export function simulateInterpret(question, draw) {
       "Content-Type": "application/json",
       Accept: "application/json",
     },
-    body: JSON.stringify(buildReadingRequest(question, draw)),
+    body: JSON.stringify({
+      ...buildReadingRequest(question, draw),
+      mode: "love-energy",
+    }),
   }).then(async (response) => {
     const result = await response.json().catch(() => null);
     if (!response.ok || !result?.ok) {

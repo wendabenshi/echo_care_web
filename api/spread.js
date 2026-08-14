@@ -94,7 +94,7 @@ function parseJson(raw) {
 }
 
 async function requestGeminiSpread(question, mode) {
-  if (shouldUseLocalContent()) {
+  if (shouldUseLocalContent(mode)) {
     return fallbackSpread(mode, question);
   }
 
